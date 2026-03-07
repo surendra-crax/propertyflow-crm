@@ -1,25 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class ContactLeadsService {
     private readonly logger = new Logger(ContactLeadsService.name);
-    private transporter: nodemailer.Transporter;
+    private resend: Resend;
 
     constructor(private prisma: PrismaService) {
-        // Initialize Nodemailer transporter
-        this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '465', 10),
-            secure: true,  // Use SSL (port 465) — more reliable on cloud hosts than STARTTLS (587)
-            tls: { rejectUnauthorized: false },
-            family: 4, // Force IPv4 — Render free tier blocks IPv6 to Gmail SMTP
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-        } as any);
+        // Initialize Resend with API Key
+        this.resend = new Resend(process.env.RESEND_API_KEY);
     }
 
     async create(data: { name: string; company?: string; email: string; phone: string; teamSize?: string; message?: string }) {
@@ -60,16 +50,20 @@ export class ContactLeadsService {
             </div>
         `;
 
-        if (process.env.SMTP_USER) {
-            await this.transporter.sendMail({
-                from: '"PropertyFlow CRM" <noreply@propertyflow.com>',
-                to: 'webxdev.ai@gmail.com',
-                subject: 'New PropertyFlow CRM Inquiry',
-                html: emailHtml,
-            });
-            this.logger.log('Lead notification email sent.');
+        if (process.env.RESEND_API_KEY) {
+            try {
+                await this.resend.emails.send({
+                    from: 'PropertyFlow <onboarding@resend.dev>',
+                    to: 'webxdev.ai@gmail.com',
+                    subject: 'New PropertyFlow CRM Inquiry',
+                    html: emailHtml,
+                });
+                this.logger.log('Lead notification email sent.');
+            } catch (error) {
+                this.logger.error('Resend failed to send email', error);
+            }
         } else {
-            this.logger.log('Email template generated but not sent because SMTP_USER is not configured in .env');
+            this.logger.log('Email template generated but not sent because RESEND_API_KEY is not configured in .env');
         }
     }
 

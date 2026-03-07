@@ -10,10 +10,9 @@ export class ContactLeadsService {
     constructor(private prisma: PrismaService) {
         // Initialize Nodemailer transporter
         this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-            port: parseInt(process.env.SMTP_PORT || '587', 10),
-            secure: false,
-            requireTLS: true,
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: parseInt(process.env.SMTP_PORT || '465', 10),
+            secure: true,  // Use SSL (port 465) — more reliable on cloud hosts than STARTTLS (587)
             tls: { rejectUnauthorized: false },
             family: 4, // Force IPv4 — Render free tier blocks IPv6 to Gmail SMTP
             auth: {

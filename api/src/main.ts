@@ -8,6 +8,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:3001',
       'http://localhost:3000',
+      'https://propertyflow-crm.vercel.app',
       'https://propertyflow.webxaitech.com',
     ],
     credentials: true

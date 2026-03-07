@@ -12,11 +12,15 @@ export class ContactLeadsService {
         this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.ethereal.email',
             port: parseInt(process.env.SMTP_PORT || '587', 10),
+            secure: false,
+            requireTLS: true,
+            tls: { rejectUnauthorized: false },
+            family: 4, // Force IPv4 — Render free tier blocks IPv6 to Gmail SMTP
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
-        });
+        } as any);
     }
 
     async create(data: { name: string; company?: string; email: string; phone: string; teamSize?: string; message?: string }) {

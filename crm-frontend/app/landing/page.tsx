@@ -12,8 +12,35 @@ export default function LandingPage() {
     const [submitSuccess, setSubmitSuccess] = useState(false)
     const [submitError, setSubmitError] = useState("")
 
+    const validateForm = () => {
+        const { name, email, phone } = formData
+
+        // Block clearly fake names
+        const fakeKeywords = ['test', 'asdf', 'qwer', 'fake', 'admin', 'demo', 'sample', 'abcd', 'xyz', 'foo', 'bar', '123']
+        if (name.trim().length < 3) return 'Please enter your full name (at least 3 characters).'
+        if (fakeKeywords.some(k => name.toLowerCase().includes(k))) return 'Please enter a real name.'
+
+        // Email: must look real — block disposable/test domains
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+        if (!emailRegex.test(email)) return 'Please enter a valid email address.'
+        const blockedDomains = ['mailinator', 'trashmail', 'guerrillamail', 'yopmail', 'tempmail', 'sharklasers', 'example.com', 'test.com', 'fake.com']
+        if (blockedDomains.some(d => email.toLowerCase().includes(d))) return 'Please use a real business email address.'
+
+        // Phone: must have at least 10 digits
+        const digitsOnly = phone.replace(/\D/g, '')
+        if (digitsOnly.length < 10) return 'Please enter a valid phone number (min 10 digits).'
+        if (/^(0+|1234567890|9876543210)$/.test(digitsOnly)) return 'Please enter a real phone number.'
+
+        return null
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        const validationError = validateForm()
+        if (validationError) {
+            setSubmitError(validationError)
+            return
+        }
         setIsSubmitting(true)
         setSubmitError("")
         try {
@@ -323,7 +350,7 @@ export default function LandingPage() {
                                             required type="email"
                                             value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })}
                                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                                            placeholder="john@example.com"
+                                            placeholder="you@yourcompany.com"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -332,7 +359,7 @@ export default function LandingPage() {
                                             required type="tel"
                                             value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                                            placeholder="+1 234 567 8900"
+                                            placeholder="+91 98765 43210"
                                         />
                                     </div>
                                     <div className="space-y-1.5 md:col-span-2">

@@ -55,17 +55,17 @@ PropertyFlow CRM is not a generic CRM — it is designed ground-up for Indian re
 | **JWT (JSON Web Tokens)** | Authentication and role-based access control |
 | **Passport.js** | JWT strategy implementation |
 | **Bcrypt** | Secure password hashing |
-| **Nodemailer** | Email notifications via Gmail SMTP |
+| **Resend SDK** | Transactional email API for reliable delivery (via HTTP) |
 
 ### Infrastructure & Deployment
 | Service | Purpose |
 |---------|---------|
 | **Vercel** | Frontend hosting with global CDN and auto-SSL |
 | **Render** | Backend (NestJS API) hosting |
-| **Supabase** | Managed PostgreSQL database with connection pooling |
+| **Supabase** | Managed PostgreSQL with pgBouncer transaction-mode pooling (Port 6543) |
 | **GitHub** | Version control and CI/CD trigger for auto-deployments |
-| **Hostinger** | Domain registrar for webxaitech.com |
-| **Gmail SMTP** | Email sending for lead capture form notifications |
+| **Hostinger** | Domain registrar for webxaitech.com (Custom CNAME config) |
+| **Resend** | Transactional email API (bypasses SMTP blocks on cloud hosts) |
 
 ---
 
@@ -165,7 +165,8 @@ Lead Created → Contacted → Site Visit Scheduled → Negotiation → Deal Clo
 
 ### 10. Landing Page with Lead Capture
 - Professional marketing landing page
-- Contact/demo request form that sends email notifications to WebXAI via Gmail SMTP
+- Contact/demo request form with strict validation (blocks fake emails/numbers)
+- Real-time email notifications sent to WebXAI via Resend API
 - "CRM Deployment Plans" pricing section (Starter / Business / Enterprise)
 - Live dashboard preview screenshot
 

@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  AGENT
+  BROKER
+}
+
+enum ProjectStatus {
+  PRELAUNCH
+  ONGOING
+  COMPLETED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  FOLLOW_UP
+  SITE_VISIT_DONE
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum LeadSource {
+  WEBSITE
+  FACEBOOK_ADS
+  GOOGLE_ADS
+  BROKER
+  REFERRAL
+  WALK_IN
+}
+
+enum PropertyType {
+  FLAT
+  VILLA
+  PLOT
+  COMMERCIAL
+}
+
+enum VisitStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      Role
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  leads         Lead[]         @relation("AgentLeads")
+  managedProj   Project[]      @relation("ManagerProjects")
+  visits        SiteVisit[]
+  activities    Activity[]
+  notifications Notification[]
+}
+
+model Project {
+  id             String        @id @default(uuid())
+  name           String
+  location       String
+  minPrice       Float
+  maxPrice       Float
+  totalUnits     Int
+  availableUnits Int
+  status         ProjectStatus
+  coverImage     String?
+  gallery        String[]
+
+  managerId String
+  manager   User @relation("ManagerProjects", fields: [managerId], references: [id])
+
+  leads Lead[]
+  deals Deal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, location])
+}
+
+model Lead {
+  id           String       @id @default(uuid())
+  fullName     String
+  phone        String
+  email        String?
+  budgetMin    Float
+  budgetMax    Float
+  propertyType PropertyType
+  status       LeadStatus
+  source       LeadSource
+  notes        String?
+  nextFollowup DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+
+  assignedAgentId String
+  assignedAgent   User @relation("AgentLeads", fields: [assignedAgentId], references: [id])
+
+  visits     SiteVisit[]
+  activities Activity[]
+  deal       Deal?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteVisit {
+  id        String      @id @default(uuid())
+  leadId    String
+  agentId   String
+  visitDate DateTime
+  status    VisitStatus
+  notes     String?
+
+  lead  Lead @relation(fields: [leadId], references: [id])
+  agent User @relation(fields: [agentId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Broker {
+  id         String @id @default(uuid())
+  name       String
+  company    String
+  phone      String
+  email      String?
+  commission Float
+
+  deals Deal[]
+
+  createdAt DateTime @default(now())
+}
+
+model Deal {
+  id               String   @id @default(uuid())
+  leadId           String   @unique
+  projectId        String
+  saleValue        Float
+  brokerId         String?
+  commissionAmount Float
+  notes            String?
+  closedAt         DateTime
+
+  lead    Lead    @relation(fields: [leadId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+  broker  Broker? @relation(fields: [brokerId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id          String @id @default(uuid())
+  leadId      String
+  userId      String
+  type        String
+  description String
+
+  lead Lead @relation(fields: [leadId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id      String  @id @default(uuid())
+  userId  String
+  title   String
+  message String
+  isRead  Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model ContactLead {
+  id        String   @id @default(uuid())
+  name      String
+  company   String?
+  email     String
+  phone     String
+  teamSize  String?
+  message   String?
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

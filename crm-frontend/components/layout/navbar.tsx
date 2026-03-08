@@ -146,7 +146,7 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+            <div className="absolute -right-16 sm:right-0 top-12 w-[320px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
                 {unreadCount > 0 && (

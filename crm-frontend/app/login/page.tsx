@@ -119,7 +119,7 @@ export default function LoginPage() {
           {/* Demo credentials */}
           <div className="border-t border-white/10 pt-4 mt-4">
             <p className="text-[11px] text-slate-500 text-center mb-2 uppercase tracking-wider">Demo Accounts</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => { setEmail("admin@propertyflow.com"); setPassword("password123") }}
@@ -127,7 +127,7 @@ export default function LoginPage() {
               >
                 <span className="font-medium text-indigo-400">Admin</span>
                 <br />
-                <span className="text-slate-500">admin@propertyflow.com</span>
+                <span className="text-slate-500 break-all">admin@propertyflow.com</span>
               </button>
               <button
                 type="button"
@@ -136,7 +136,7 @@ export default function LoginPage() {
               >
                 <span className="font-medium text-indigo-400">Manager</span>
                 <br />
-                <span className="text-slate-500">priya@propertyflow.com</span>
+                <span className="text-slate-500 break-all">priya@propertyflow.com</span>
               </button>
               <button
                 type="button"
@@ -145,7 +145,7 @@ export default function LoginPage() {
               >
                 <span className="font-medium text-indigo-400">Agent</span>
                 <br />
-                <span className="text-slate-500">amit@propertyflow.com</span>
+                <span className="text-slate-500 break-all">amit@propertyflow.com</span>
               </button>
               <button
                 type="button"
@@ -154,7 +154,7 @@ export default function LoginPage() {
               >
                 <span className="font-medium text-indigo-400">Broker</span>
                 <br />
-                <span className="text-slate-500">sunil@brokers.com</span>
+                <span className="text-slate-500 break-all">sunil@brokers.com</span>
               </button>
             </div>
           </div>

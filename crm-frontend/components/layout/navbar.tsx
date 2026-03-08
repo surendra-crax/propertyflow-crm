@@ -146,9 +146,9 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
           </button>
 
           {showNotifications && (
-            <div className="absolute -right-16 sm:right-0 top-12 w-[320px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-                <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
+            <div className="fixed left-4 right-4 top-[72px] sm:absolute sm:left-auto sm:right-0 sm:top-12 w-auto sm:w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Notifications</h3>
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
@@ -167,12 +167,12 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
                   notifications.slice(0, 10).map((n: any) => (
                     <div
                       key={n.id}
-                      className={`px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${!n.isRead ? "bg-indigo-50/50" : ""
+                      className={`px-4 py-3 border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${!n.isRead ? "bg-indigo-50/50 dark:bg-indigo-900/20" : ""
                         }`}
                     >
-                      <p className="text-sm font-medium text-slate-700">{n.title}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{n.message}</p>
-                      <p className="text-[10px] text-slate-300 mt-1">
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{n.title}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-400 mt-0.5">{n.message}</p>
+                      <p className="text-[10px] text-slate-300 dark:text-slate-500 mt-1">
                         {new Date(n.createdAt).toLocaleDateString()}
                       </p>
                     </div>

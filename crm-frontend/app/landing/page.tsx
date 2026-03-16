@@ -453,86 +453,89 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── PRICING ─── */}
       <section id="pricing" className="py-24 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 transition-colors">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <p className="text-indigo-600 dark:text-indigo-400 text-sm font-bold uppercase tracking-widest mb-3">Pricing</p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">CRM Deployment Plans</h2>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-4">Transparent One-Time Investment</h2>
             <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Custom-deployed and managed real estate CRM for your team — by WebXAI.
+              Get your own dedicated real estate sales operating system. No monthly fees. full ownership.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Starter */}
-            <div className="rounded-2xl p-8 flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Starter CRM</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Best for small real estate teams.</p>
-              <div className="my-6 border-t border-slate-100 dark:border-slate-700 pt-6">
-                <div className="text-3xl font-extrabold text-slate-800 dark:text-white">₹15,000<span className="text-base font-medium text-slate-400 dark:text-slate-500"> / month</span></div>
-                <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">or ₹1,50,000 / year</div>
-              </div>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {["Lead management system", "Pipeline tracking", "Site visit scheduling", "WhatsApp follow-up integration", "Basic analytics dashboard", "Company branding inside CRM", "Domain setup", "Hosting setup", "Basic maintenance and support"].map((f, j) => (
-                  <li key={j} className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-                    <span className="text-slate-600 dark:text-slate-300 leading-snug">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <button onClick={scrollToContact} className="w-full text-center px-6 py-3.5 rounded-xl text-sm font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-700 dark:hover:text-indigo-400 transition-all border border-slate-200 dark:border-slate-600">
-                Book Consultation
-              </button>
-            </div>
 
-            {/* Business — highlighted */}
-            <div className="rounded-2xl p-8 flex flex-col relative bg-gradient-to-br from-indigo-600 to-purple-700 text-white shadow-2xl shadow-indigo-500/30 scale-[1.03] z-10">
-              <div className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-emerald-400 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase shadow-lg">Most Popular</div>
-              <h3 className="text-xl font-bold text-white">Business CRM</h3>
-              <p className="text-sm text-indigo-200 mt-1">Best for growing real estate agencies.</p>
-              <div className="my-6 border-t border-white/20 pt-6">
-                <div className="text-3xl font-extrabold text-white">₹30,000<span className="text-base font-medium text-indigo-200"> / month</span></div>
-                <div className="text-sm text-indigo-200 mt-1">or ₹3,00,000 / year</div>
-              </div>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {["Project management module", "Agent performance tracking", "Deal management system", "Revenue analytics dashboards", "Automation setup", "Custom reporting", "Priority technical support", "Custom CRM branding"].map((f, j) => (
-                  <li key={j} className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-indigo-200 shrink-0 mt-0.5" />
-                    <span className="text-indigo-100 leading-snug">{f}</span>
-                  </li>
-                ))}
-                <li className="text-xs text-indigo-300 italic pt-1">+ Everything in Starter</li>
-              </ul>
-              <button onClick={scrollToContact} className="w-full text-center px-6 py-3.5 rounded-xl text-sm font-semibold bg-white text-indigo-600 hover:bg-indigo-50 transition-all">
-                Book Consultation
-              </button>
-            </div>
+          <div className="max-w-3xl mx-auto">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
+              <div className="relative rounded-[2rem] p-8 md:p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+                
+                {/* Decoration */}
+                <div className="absolute top-0 right-0 -tr-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Enterprise */}
-            <div className="rounded-2xl p-8 flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Enterprise CRM</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Best for large developers and real estate companies.</p>
-              <div className="my-6 border-t border-slate-100 dark:border-slate-700 pt-6">
-                <div className="text-2xl font-extrabold text-slate-800 dark:text-white leading-tight">Custom Pricing</div>
-                <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">Deployment under ₹3,00,000</div>
+                <div className="flex flex-col md:flex-row gap-12 items-center md:items-start relative">
+                  
+                  {/* Left Col — Price & CTA */}
+                  <div className="w-full md:w-5/12 flex flex-col items-center md:items-start text-center md:text-left">
+                    <div className="inline-flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-100 dark:border-indigo-500/20">
+                      Early Deployment Offer
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">PropertyFlow CRM Deployment</h3>
+                    
+                    <div className="my-6">
+                      <div className="text-lg text-slate-400 dark:text-slate-500 line-through font-medium">₹3,00,000</div>
+                      <div className="text-5xl font-black text-slate-900 dark:text-white tracking-tight mt-1">₹1,50,000</div>
+                      <div className="mt-4 space-y-1">
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">50% Limited Launch Offer</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">One-time setup. No monthly subscription.</p>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={scrollToContact}
+                      className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-4 rounded-xl text-base font-bold transition-all shadow-xl shadow-indigo-500/25 group mb-4"
+                    >
+                      Request Deployment
+                    </button>
+                    
+                    <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center md:text-left leading-relaxed">
+                      Your company receives a dedicated CRM installation with full data ownership.
+                    </p>
+                  </div>
+
+                  {/* Right Col — Features */}
+                  <div className="flex-1 w-full">
+                    <div className="grid grid-cols-1 gap-y-3.5">
+                      {[
+                        "Complete lead management system",
+                        "Sales pipeline tracking",
+                        "Site visit scheduling",
+                        "Project & inventory management",
+                        "Agent performance dashboard",
+                        "Deal and revenue tracking",
+                        "Campaign source tracking",
+                        "WhatsApp communication integration",
+                        "Company branding inside CRM",
+                        "Hosting and domain setup",
+                        "CRM deployment and configuration",
+                        "Team onboarding and training"
+                      ].map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-3">
+                          <div className="w-5 h-5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <ul className="space-y-2.5 mb-8 flex-1">
-                {["White-label CRM system", "Full company branding", "Landing page setup for the client", "Custom automation workflows", "Dedicated hosting deployment", "Team training and onboarding", "Advanced customization options"].map((f, j) => (
-                  <li key={j} className="flex items-start gap-2 text-sm">
-                    <Check className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-                    <span className="text-slate-600 dark:text-slate-300 leading-snug">{f}</span>
-                  </li>
-                ))}
-                <li className="text-xs text-slate-400 italic pt-1">+ Everything in Business</li>
-              </ul>
-              <button onClick={scrollToContact} className="w-full text-center px-6 py-3.5 rounded-xl text-sm font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-700 dark:hover:text-indigo-400 transition-all border border-slate-200 dark:border-slate-600">
-                Let&apos;s Discuss
-              </button>
             </div>
           </div>
-          <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-12 max-w-2xl mx-auto leading-relaxed">
-            PropertyFlow CRM is deployed and customized specifically for your real estate company by WebXAI.<br />
-            Contact us to schedule a consultation and see how the platform can be tailored for your business.
+          
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-16 max-w-2xl mx-auto leading-relaxed">
+            PropertyFlow CRM is exclusively deployed and managed for your real estate company by WebXAI.<br />
+            Schedule a consultation to see how we can transform your sales operations.
           </p>
         </div>
       </section>

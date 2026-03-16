@@ -17,6 +17,14 @@ import {
   Building2,
   UserCog,
   X,
+  Upload,
+  FileSearch,
+  KeyRound,
+  Megaphone,
+  Timer,
+  ShieldAlert,
+  Gauge,
+  Zap,
 } from "lucide-react"
 
 const menu = [
@@ -29,7 +37,15 @@ const menu = [
   { name: "Projects", path: "/projects", icon: FolderKanban, roles: ["ADMIN", "MANAGER", "BROKER"] },
   { name: "Brokers", path: "/brokers", icon: Building2, roles: ["ADMIN"] },
   { name: "Agents", path: "/agents", icon: Users, roles: ["ADMIN"] },
+  { name: "Campaigns", path: "/campaigns", icon: Megaphone, roles: ["ADMIN", "MANAGER"] },
   { name: "Analytics", path: "/projects/analytics", icon: BarChart3, roles: ["ADMIN", "MANAGER"] },
+  { name: "Response Time", path: "/analytics/response-time", icon: Timer, roles: ["ADMIN", "MANAGER"] },
+  { name: "Lead Leakage", path: "/analytics/lead-leakage", icon: ShieldAlert, roles: ["ADMIN", "MANAGER"] },
+  { name: "Sales Velocity", path: "/analytics/sales-velocity", icon: Gauge, roles: ["ADMIN", "MANAGER"] },
+  { name: "Bulk Import", path: "/leads/import", icon: Upload, roles: ["ADMIN", "MANAGER"] },
+  { name: "Automations", path: "/settings/automations", icon: Zap, roles: ["ADMIN"] },
+  { name: "Audit Log", path: "/settings/audit-log", icon: FileSearch, roles: ["ADMIN"] },
+  { name: "API Keys", path: "/settings/api-keys", icon: KeyRound, roles: ["ADMIN"] },
   { name: "Settings", path: "/settings", icon: Settings, roles: ["ADMIN"] },
 ]
 
@@ -112,7 +128,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsO
         </div>
         <div className="pt-3 border-t border-slate-800 text-center">
           <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold flex items-center justify-center gap-1.5">
-            Powered by <a href="https://webxai.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300">WebXAI</a>
+            Powered by <a href="https://webxaitech.com" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300">WebXAI</a>
           </p>
         </div>
       </div>

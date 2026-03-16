@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { api } from "../../../lib/api"
-import { MapPin, Calendar, User } from "lucide-react"
+import { MapPin, Calendar, User, List } from "lucide-react"
+import { SiteVisitCalendar } from "../../../components/site-visits/calendar-view"
 
 const statusColors: Record<string, string> = {
   SCHEDULED: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-900/30",
@@ -11,6 +12,7 @@ const statusColors: Record<string, string> = {
 }
 
 export default function SiteVisitsPage() {
+  const [view, setView] = useState<"LIST" | "CALENDAR">("LIST")
   const [visits, setVisits] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,12 +33,30 @@ export default function SiteVisitsPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-bold text-slate-800 dark:text-white">Site Visits</h1>
-        <p className="text-sm text-slate-400 dark:text-slate-500">{visits.length} visits</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white">Site Visits</h1>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{visits.length} scheduled visits</p>
+        </div>
+        <div className="flex bg-slate-100 p-1 rounded-lg border">
+          <button 
+            onClick={() => setView("LIST")}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${view === "LIST" ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            List
+          </button>
+          <button 
+            onClick={() => setView("CALENDAR")}
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${view === "CALENDAR" ? "bg-white shadow-sm text-indigo-600" : "text-slate-500 hover:text-slate-700"}`}
+          >
+            Calendar
+          </button>
+        </div>
       </div>
 
-      {visits.length === 0 ? (
+      {view === "CALENDAR" ? (
+        <SiteVisitCalendar />
+      ) : visits.length === 0 ? (
         <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
           <MapPin className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
           <p className="text-sm text-slate-500 dark:text-slate-400">No site visits</p>

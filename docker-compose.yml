@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: propertyflow_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-propertyflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-propertyflow_crm}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-propertyflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: propertyflow_api
+    restart: unless-stopped
+    env_file: ./api/.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-propertyflow}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-propertyflow_crm}
+      DIRECT_URL: postgresql://${POSTGRES_USER:-propertyflow}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-propertyflow_crm}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && npm run start:prod"
+
+  frontend:
+    build:
+      context: ./crm-frontend
+      dockerfile: Dockerfile
+    container_name: propertyflow_frontend
+    restart: unless-stopped
+    env_file: ./crm-frontend/.env.local
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

@@ -38,6 +38,16 @@ enum LeadSource {
   BROKER
   REFERRAL
   WALK_IN
+  HOUSING_COM
+  MAGICBRICKS
+  NINETY_NINE_ACRES
+  WEBHOOK
+}
+
+enum LeadTemperature {
+  HOT
+  WARM
+  COLD
 }
 
 enum PropertyType {
@@ -51,6 +61,70 @@ enum VisitStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+}
+
+enum PaymentStage {
+  TOKEN
+  BOOKING
+  AGREEMENT
+  FINAL_PAYMENT
+}
+
+enum UnitStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  MGMT_QUOTA
+}
+
+enum DocumentType {
+  PDF
+  IMAGE
+  DOCUMENT
+}
+
+enum EntityType {
+  LEAD
+  DEAL
+  PROJECT
+}
+
+enum IntegrationType {
+  FACEBOOK
+  GOOGLE
+  NINETY_NINE_ACRES
+  MAGICBRICKS
+  HOUSING_COM
+  WEBSITE
+  WEBHOOK
+  TWILIO_WHATSAPP
+  TWILIO_SMS
+  META_WHATSAPP
+  RESEND
+  SENDGRID
+  AWS_S3
+}
+
+model TenantConfig {
+  id             String  @id @default(uuid())
+  companyName    String
+  logoUrl        String?
+  brandColor     String?
+  emailSignature String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Integration {
+  id          String          @id @default(uuid())
+  type        IntegrationType
+  isActive    Boolean         @default(false)
+  credentials Json?
+  config      Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {
@@ -84,10 +158,11 @@ model Project {
   gallery        String[]
 
   managerId String
-  manager   User @relation("ManagerProjects", fields: [managerId], references: [id])
+  manager   User   @relation("ManagerProjects", fields: [managerId], references: [id])
 
   leads Lead[]
   deals Deal[]
+  units Unit[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,8 +170,26 @@ model Project {
   @@unique([name, location])
 }
 
+model Unit {
+  id         String     @id @default(uuid())
+  unitNumber String
+  floor      String
+  type       String
+  area       Float
+  price      Float
+  status     UnitStatus @default(AVAILABLE)
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+
+  deals Deal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Lead {
-  id           String       @id @default(uuid())
+  id           String           @id @default(uuid())
   fullName     String
   phone        String
   email        String?
@@ -107,12 +200,14 @@ model Lead {
   source       LeadSource
   notes        String?
   nextFollowup DateTime?
+  score        Int              @default(0)
+  temperature  LeadTemperature?
 
   projectId String
   project   Project @relation(fields: [projectId], references: [id])
 
   assignedAgentId String
-  assignedAgent   User @relation("AgentLeads", fields: [assignedAgentId], references: [id])
+  assignedAgent   User   @relation("AgentLeads", fields: [assignedAgentId], references: [id])
 
   visits     SiteVisit[]
   activities Activity[]
@@ -120,6 +215,11 @@ model Lead {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([assignedAgentId])
+  @@index([projectId])
+  @@index([createdAt])
 }
 
 model SiteVisit {
@@ -137,14 +237,16 @@ model SiteVisit {
 }
 
 model Broker {
-  id         String @id @default(uuid())
-  name       String
-  company    String
-  phone      String
-  email      String?
-  commission Float
+  id                   String  @id @default(uuid())
+  name                 String
+  company              String
+  phone                String
+  email                String?
+  commissionPercentage Float?
+  commission           Float
 
-  deals Deal[]
+  deals              Deal[]
+  commissionPayments CommissionPayment[]
 
   createdAt DateTime @default(now())
 }
@@ -153,15 +255,44 @@ model Deal {
   id               String   @id @default(uuid())
   leadId           String   @unique
   projectId        String
+  unitId           String?
   saleValue        Float
   brokerId         String?
   commissionAmount Float
   notes            String?
   closedAt         DateTime
 
-  lead    Lead    @relation(fields: [leadId], references: [id])
-  project Project @relation(fields: [projectId], references: [id])
-  broker  Broker? @relation(fields: [brokerId], references: [id])
+  lead     Lead      @relation(fields: [leadId], references: [id])
+  project  Project   @relation(fields: [projectId], references: [id])
+  unit     Unit?     @relation(fields: [unitId], references: [id])
+  broker   Broker?   @relation(fields: [brokerId], references: [id])
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id            String       @id @default(uuid())
+  amount        Float
+  date          DateTime
+  paymentMethod String
+  paymentStage  PaymentStage
+  notes         String?
+
+  dealId String
+  deal   Deal   @relation(fields: [dealId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model CommissionPayment {
+  id       String   @id @default(uuid())
+  brokerId String
+  amount   Float
+  date     DateTime
+  notes    String?
+
+  broker Broker @relation(fields: [brokerId], references: [id])
 
   createdAt DateTime @default(now())
 }
@@ -203,3 +334,77 @@ model ContactLead {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model AutomationRule {
+  id        String  @id @default(uuid())
+  name      String
+  condition String
+  action    String
+  config    Json?
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id         String       @id @default(uuid())
+  name       String
+  url        String
+  type       DocumentType
+  entityType EntityType
+  entityId   String
+
+  createdAt DateTime @default(now())
+}
+
+model MessageTemplate {
+  id   String @id @default(uuid())
+  name String
+  body String
+  type String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String  @id @default(uuid())
+  userId     String?
+  userEmail  String?
+  action     String
+  entityType String?
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+
+  createdAt DateTime @default(now())
+}
+
+model ApiKey {
+  id        String    @id @default(uuid())
+  label     String
+  keyHash   String    @unique
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model Campaign {
+  id              String   @id @default(uuid())
+  name            String
+  source          String
+  adSpend         Float    @default(0)
+  leadsGenerated  Int      @default(0)
+  visitsGenerated Int      @default(0)
+  bookings        Int      @default(0)
+  startDate       DateTime?
+  endDate         DateTime?
+  notes           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [leadSources, setLeadSources] = useState<any[]>([])
   const [pipelineForecast, setPipelineForecast] = useState<any[]>([])
   const [agentLeaderboard, setAgentLeaderboard] = useState<any[]>([])
+  const [leaderboardMonth, setLeaderboardMonth] = useState("ALL")
   const [todayFollowups, setTodayFollowups] = useState<any[]>([])
   const [overdueFollowups, setOverdueFollowups] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -27,14 +28,26 @@ export default function DashboardPage() {
     loadDashboard()
   }, [])
 
+  useEffect(() => {
+    loadLeaderboard()
+  }, [leaderboardMonth])
+
+  async function loadLeaderboard() {
+    try {
+      const res = await api.get(`/analytics/agent-leaderboard?month=${leaderboardMonth}`)
+      setAgentLeaderboard(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   async function loadDashboard() {
     try {
-      const [metricsRes, revenueRes, sourcesRes, forecastRes, leaderRes, todayRes, overdueRes] = await Promise.all([
+      const [metricsRes, revenueRes, sourcesRes, forecastRes, todayRes, overdueRes] = await Promise.all([
         api.get("/analytics/dashboard"),
         api.get("/analytics/monthly-revenue"),
         api.get("/analytics/lead-sources"),
         api.get("/analytics/pipeline-forecast"),
-        api.get("/analytics/agent-leaderboard"),
         api.get("/leads/followups/today"),
         api.get("/leads/followups/overdue"),
       ])
@@ -42,7 +55,6 @@ export default function DashboardPage() {
       setMonthlyRevenue(revenueRes.data)
       setLeadSources(sourcesRes.data)
       setPipelineForecast(forecastRes.data)
-      setAgentLeaderboard(leaderRes.data)
       setTodayFollowups(todayRes.data)
       setOverdueFollowups(overdueRes.data)
     } catch (err) {
@@ -235,7 +247,28 @@ export default function DashboardPage() {
 
             {/* Agent Leaderboard */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Agent Leaderboard</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Agent Leaderboard</h3>
+                <select 
+                  value={leaderboardMonth}
+                  onChange={(e) => setLeaderboardMonth(e.target.value)}
+                  className="px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none"
+                >
+                  <option value="ALL">All Time</option>
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
               <div className="space-y-3">
                 {agentLeaderboard.map((agent: any, i: number) => (
                   <div key={agent.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-transparent dark:border-slate-800">

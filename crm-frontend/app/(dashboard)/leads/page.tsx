@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { api } from "../../../lib/api"
 import CreateLeadModal from "../../../components/leads/create-lead-modal"
-import { Target, Phone, Calendar, Search, Filter, MessageSquare } from "lucide-react"
+import { Target, Phone, Calendar, Search, Filter, MessageSquare, FileText } from "lucide-react"
 import Link from "next/link"
 
 const statusColors: Record<string, string> = {
@@ -23,25 +23,44 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("ALL")
 
+  const [page, setPage] = useState(1)
+  const [meta, setMeta] = useState<any>(null)
+
   async function loadLeads() {
+    setLoading(true)
     try {
-      const res = await api.get("/leads")
-      setLeads(res.data)
+      const res = await api.get("/leads", {
+        params: { page, limit: 24, status: statusFilter, search }
+      })
+      setLeads(res.data.data)
+      setMeta(res.data.meta)
     } catch (err) {
       console.error(err)
     }
     setLoading(false)
   }
 
-  useEffect(() => { loadLeads() }, [])
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      loadLeads()
+    }, 300)
+    return () => clearTimeout(delay)
+  }, [page, statusFilter, search])
 
-  const filtered = leads.filter(lead => {
-    const matchesSearch = lead.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      lead.phone.includes(search) ||
-      lead.project?.name?.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = statusFilter === "ALL" || lead.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  async function handleExport() {
+    try {
+      const res = await api.get('/exports/leads', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'leads.csv')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      console.error("Export failed", err)
+    }
+  }
 
   if (loading) {
     return (
@@ -62,14 +81,22 @@ export default function LeadsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-800 dark:text-white">Leads</h1>
-          <p className="text-sm text-slate-400 dark:text-slate-500">{leads.length} total leads</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{meta?.total || 0} total leads</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-sm"
-        >
-          + Create Lead
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+          >
+            <FileText className="w-4 h-4" /> Export
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-sm"
+          >
+            + Create Lead
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -80,13 +107,19 @@ export default function LeadsPage() {
             type="text"
             placeholder="Search leads..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
             className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 dark:focus:border-indigo-500/50"
           />
         </div>
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            setStatusFilter(e.target.value)
+            setPage(1)
+          }}
           className="px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/50 appearance-none"
         >
           <option value="ALL">All Statuses</option>
@@ -101,14 +134,14 @@ export default function LeadsPage() {
       </div>
 
       {/* Lead Cards */}
-      {filtered.length === 0 ? (
+      {leads.length === 0 ? (
         <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
           <Target className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
           <p className="text-sm text-slate-500 dark:text-slate-400">No leads found</p>
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((lead) => (
+          {leads.map((lead) => (
             <div key={lead.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:shadow-md hover:border-indigo-200 dark:hover:border-slate-600 transition-all flex flex-col overflow-hidden group">
               <Link href={`/leads/${lead.id}`} className="p-4 flex-1">
                 <div className="flex justify-between items-start mb-3">
@@ -141,6 +174,20 @@ export default function LeadsPage() {
                     <span className="text-slate-400 dark:text-slate-500">Source</span>
                     <span className="text-slate-600 dark:text-slate-300">{lead.source?.replace(/_/g, " ")}</span>
                   </div>
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-50 dark:border-slate-800/50">
+                    <div className="flex gap-1.5">
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                        lead.temperature === 'HOT' ? 'bg-red-100 text-red-600 border-red-200' :
+                        lead.temperature === 'WARM' ? 'bg-orange-100 text-orange-600 border-orange-200' :
+                        'bg-blue-100 text-blue-600 border-blue-200'
+                      } border`}>
+                        {lead.temperature || 'COLD'}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[9px] font-bold border border-slate-200 dark:border-slate-700">
+                        {lead.score} PTS
+                      </span>
+                    </div>
+                  </div>
                   {lead.nextFollowup && (
                     <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-50 dark:border-slate-800/50">
                       <span className="flex items-center gap-1 text-amber-600 dark:text-amber-500 font-medium">
@@ -172,6 +219,31 @@ export default function LeadsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {meta && meta.totalPages > 1 && (
+        <div className="flex justify-between items-center mt-6 p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <p className="text-sm text-slate-500">
+            Showing <span className="font-semibold text-slate-700 dark:text-slate-300">{((meta.page - 1) * meta.limit) + 1}</span> to <span className="font-semibold text-slate-700 dark:text-slate-300">{Math.min(meta.page * meta.limit, meta.total)}</span> of <span className="font-semibold text-slate-700 dark:text-slate-300">{meta.total}</span> leads
+          </p>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={meta.page === 1}
+              className="px-3 py-1.5 text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+            >
+              Previous
+            </button>
+            <button 
+              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+              disabled={meta.page === meta.totalPages}
+              className="px-3 py-1.5 text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg disabled:opacity-50 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 

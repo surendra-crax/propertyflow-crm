@@ -4,6 +4,7 @@ import { useState } from "react"
 import Sidebar from "../../components/layout/sidebar"
 import Navbar from "../../components/layout/navbar"
 import { AuthProvider } from "../../components/auth/auth-provider"
+import { Toaster } from "sonner"
 
 export default function DashboardLayout({
   children,
@@ -33,6 +34,7 @@ export default function DashboardLayout({
           />
         )}
       </div>
+      <Toaster position="bottom-right" richColors closeButton toastOptions={{ duration: 4000 }} />
     </AuthProvider>
   )
 }

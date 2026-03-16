@@ -5,6 +5,7 @@ import {
   Patch,
   Body,
   Param,
+  Query,
   UseGuards
 } from '@nestjs/common'
 
@@ -39,6 +40,19 @@ export class SiteVisitsController {
   @Get()
   findAll() {
     return this.siteVisitsService.getVisits()
+  }
+
+  @Roles('ADMIN', 'MANAGER', 'AGENT')
+  @Get('calendar')
+  getCalendar(
+    @Query('start') start: string,
+    @Query('end') end: string,
+    @Query('agentId') agentId?: string
+  ) {
+    if (!start || !end) {
+      throw new Error('start and end dates are required');
+    }
+    return this.siteVisitsService.getCalendarVisits(new Date(start), new Date(end), agentId);
   }
 
   @Roles('ADMIN', 'MANAGER', 'AGENT')

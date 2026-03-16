@@ -7,7 +7,7 @@ export default function StickyWidget() {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
             {isOpen && (
                 <div className="absolute bottom-16 right-0 mb-4 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform origin-bottom-right transition-all animate-in fade-in slide-in-from-bottom-4">
                     <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white">
@@ -51,9 +51,9 @@ export default function StickyWidget() {
 
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:scale-105 transition-all outline-none"
+                className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-500/30 hover:shadow-2xl hover:scale-105 transition-all outline-none"
             >
-                {isOpen ? <X className="w-6 h-6" /> : <HelpCircle className="w-6 h-6" />}
+                {isOpen ? <X className="w-5 h-5 md:w-6 md:h-6" /> : <HelpCircle className="w-5 h-5 md:w-6 md:h-6" />}
             </button>
         </div>
     )

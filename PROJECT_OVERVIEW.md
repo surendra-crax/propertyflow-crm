@@ -118,57 +118,39 @@ Lead Created → Contacted → Site Visit Scheduled → Negotiation → Deal Clo
 
 ## Key Features
 
-### 1. Lead Management
+### 1. Lead Management & Scoring
 - Create, assign, and track leads with status pipeline
-- Full lead detail pages with activity timeline
+- **Intelligent Lead Scoring**: Automatic scoring based on budget, source, and engagement
+- **Temperature Tracking**: Visual Hot/Warm/Cold indicators for high-intent leads
+- Full lead detail pages with activity timeline and document storage
 - Filter leads by status, source, project, and agent
-- Export leads to CSV
+- **Bulk Import**: Streaming CSV ingestion for massive lead data migration
 
-### 2. Pipeline Board
+### 2. Pipeline & Workflow Board
 - Kanban-style drag view of leads across pipeline stages
 - Visual deal forecasting by stage
+- **Site Visit Calendar**: Centralized view of all scheduled property tours
 
-### 3. Site Visit Scheduling
-- Schedule property visits directly from a lead profile
-- Track status: Scheduled → Completed / Cancelled
-- Automated date and time management
+### 3. Property Inventory Management
+- Full multi-tier inventory: Projects > Towers > Floors > Units
+- Track unit status (Available, Reserved, Sold) and configurations
 
-### 4. WhatsApp Follow-up Integration
-- One-click WhatsApp message pre-filled with lead details
-- Tracks follow-up history and pendng actions
+### 4. Financial & Commission Engine
+- **Deal Payments**: Track multi-stage payments (Token, Booking, Agreement)
+- **Broker System**: manage channel partners and track commission payouts
+- **Commission Calculator**: Automatic computation based on deal sale value
 
-### 5. Deal Management
-- Convert closed leads to formal deals
-- Track sale value, commission, and assigned broker
-- Deal analytics by month and agent
+### 5. Integration & Document Management
+- **Centralized Integrations**: Configure FB Ads, WhatsApp, SMS, and Email gateways from the UI
+- **Polymorphic Documents**: Attach identity proofs, agreements, and floor plans to Leads, Deals, or Projects via AWS S3
+- WhatsApp Business Integration for one-click engagement
 
-### 6. Analytics Dashboard
-- Revenue charts (monthly, by project)
-- Agent leaderboard with conversion rates
-- Lead source breakdown
-- Pipeline forecast
-
-### 7. Project Management
-- Create real estate projects (residential, commercial)
-- Assign leads to specific projects
-- Project-wise revenue and lead analytics
-
-### 8. Role-Based Access Control
-- Admin: full system access
-- Manager: team analytics, deal approval
-- Agent: own leads and follow-ups only
-- Broker: limited to referred leads and commissions
-
-### 9. Dark Mode
-- Full light/dark theme support across all pages
-- Respects system preference, also manually toggleable
-
-### 10. Landing Page with Lead Capture
-- Professional marketing landing page
-- Contact/demo request form with strict validation (blocks fake emails/numbers)
-- Real-time email notifications sent to WebXAI via Resend API
-- "CRM Deployment Plans" pricing section (Starter / Business / Enterprise)
-- Live dashboard preview screenshot
+### 6. Role-Based Access Control & White-Labeling
+- Admin: Full system access and tenant configuration
+- Manager: Team analytics, deal approval, and reporting
+- Agent: Own leads, follow-ups, and site visits
+- **White-Labeling**: Custom company name, logos, and brand colors per deployment
+- Dark Mode support across all dashboards
 
 ---
 
@@ -207,16 +189,12 @@ The following enhancements are planned or scoped for future versions:
 
 ### Near-Term (3–6 months)
 - **Mobile App** — React Native companion app for agents on the field
-- **Automated Lead Capture** — Integrate with Facebook Ads, MagicBricks, 99acres APIs to auto-import leads
-- **WhatsApp Business API** — Replace manual WhatsApp links with automated templated messages via official WA Business API
 - **Email Drip Campaigns** — Automated email sequences for lead nurturing
 - **Google Calendar Sync** — Sync site visits with agent's Google Calendar
 
 ### Medium-Term (6–12 months)
-- **AI Lead Scoring** — Machine learning model to score leads by conversion probability based on behavior and profile
-- **SMS/IVR Integration** — Auto-call or SMS reminders for follow-ups via Twilio or MSG91
-- **Document Management** — Attach agreement PDFs, brochures, floor plans to leads and deals
-- **Commission Calculator** — Automate broker commission computation per deal
+- **Advanced AI Chatbot** — Website chatbot that qualifies leads and creates CRM entries automatically
+- **SMS/IVR Voice Integration** — Auto-call reminders for follow-ups via Twilio or MSG91
 - **Multi-branch Support** — One CRM, multiple city/branch offices with isolated pipelines
 
 ### Long-Term Vision

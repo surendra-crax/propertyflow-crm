@@ -79,4 +79,22 @@ export class DealsService {
       orderBy: { createdAt: 'desc' }
     })
   }
+
+  async getDealById(id: string) {
+    return this.prisma.deal.findUnique({
+      where: { id },
+      include: {
+        lead: {
+          include: {
+            assignedAgent: { select: { name: true } }
+          }
+        },
+        project: true,
+        broker: true,
+        payments: {
+          orderBy: { date: 'desc' }
+        }
+      }
+    })
+  }
 }

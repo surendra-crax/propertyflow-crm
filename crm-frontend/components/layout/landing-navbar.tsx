@@ -68,12 +68,7 @@ export default function LandingNavbar() {
                     )}
 
                     <div className="flex items-center gap-4">
-                        <Link
-                            href="/demo-login"
-                            className={`text-sm font-medium transition-colors ${isScrolled ? "text-slate-700 dark:text-slate-200" : "text-white/90"} hover:text-indigo-600 dark:hover:text-indigo-400`}
-                        >
-                            Demo CRM
-                        </Link>
+
                         <a
                             href="#contact-form"
                             onClick={(e) => scrollToSection(e, "#contact-form")}
@@ -107,13 +102,7 @@ export default function LandingNavbar() {
             {mobileMenuOpen && (
                 <div className="md:hidden absolute top-20 left-0 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl flex flex-col items-center py-6 px-6 gap-6">
                     <div className="flex flex-col gap-4 w-full mt-2">
-                        <Link
-                            href="/demo-login"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="w-full text-center py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-800"
-                        >
-                            View Demo
-                        </Link>
+
                         <a
                             href="#contact-form"
                             onClick={(e) => scrollToSection(e, "#contact-form")}

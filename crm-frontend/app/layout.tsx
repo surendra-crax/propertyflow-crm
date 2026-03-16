@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PropertyFlow CRM",
   description: "Smart Real Estate CRM by WebXAI",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 import { ThemeProvider } from "../components/theme-provider";

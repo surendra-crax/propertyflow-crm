@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { api } from "../../../lib/api"
-import { FolderKanban, MapPin } from "lucide-react"
+import { FolderKanban, MapPin, Building2 } from "lucide-react"
+import Link from "next/link"
+import { Button } from "../../../components/ui/button"
 
 const statusColors: Record<string, string> = {
   PRELAUNCH: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-900/30",
@@ -99,6 +101,17 @@ export default function ProjectsPage() {
                         style={{ width: `${occupancy}%` }}
                       />
                     </div>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <Link href={`/projects/${project.id}/units`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
+                        <Building2 className="w-3.5 h-3.5" />
+                        Inventory
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" size="sm" className="text-xs">
+                      Details
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { api } from "../../../../lib/api"
 import { ArrowLeft, Phone, Mail, Calendar, User, Clock, Tag, MessageSquare } from "lucide-react"
 import Link from "next/link"
+import { DocumentManager } from "../../../../components/shared/document-manager"
 
 const statusColors: Record<string, string> = {
   NEW: "bg-blue-100 text-blue-700",
@@ -91,9 +92,23 @@ export default function LeadDetailPage() {
           <h1 className="text-xl font-bold text-slate-800">{lead.fullName}</h1>
           <p className="text-sm text-slate-400">{lead.project?.name} · {lead.source?.replace(/_/g, " ")}</p>
         </div>
-        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status]}`}>
-          {lead.status.replace(/_/g, " ")}
-        </span>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5 mr-2">
+            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+              lead.temperature === 'HOT' ? 'bg-red-100 text-red-600 border-red-200' :
+              lead.temperature === 'WARM' ? 'bg-orange-100 text-orange-600 border-orange-200' :
+              'bg-blue-100 text-blue-600 border-blue-200'
+            } border shadow-sm`}>
+              {lead.temperature || 'COLD'}
+            </span>
+            <span className="px-2 py-0.5 rounded bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 text-[10px] font-bold border border-slate-200 dark:border-slate-700 shadow-sm">
+              {lead.score} PTS
+            </span>
+          </div>
+          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status]}`}>
+            {lead.status.replace(/_/g, " ")}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -168,6 +183,10 @@ export default function LeadDetailPage() {
                 <p className="text-sm text-slate-600">{lead.notes}</p>
               </div>
             )}
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <DocumentManager entityId={lead.id} entityType="LEAD" />
           </div>
 
           {/* Deal Info */}

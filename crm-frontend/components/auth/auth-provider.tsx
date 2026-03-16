@@ -29,7 +29,17 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
 
     const router = useRouter()
-    const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<User | null>(() => {
+        if (typeof window !== "undefined") {
+            const storedUser = localStorage.getItem("user")
+            try {
+                return storedUser ? JSON.parse(storedUser) : null
+            } catch {
+                return null
+            }
+        }
+        return null
+    })
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -37,18 +47,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedUser = localStorage.getItem("user")
 
         if (!token || !storedUser) {
+            // Only redirect if we're not already on a path that handles its own auth
+            // or if we're specifically in the dashboard area
             router.push("/login")
             return
         }
 
-        try {
-            setUser(JSON.parse(storedUser))
-        } catch {
-            router.push("/login")
+        if (!user) {
+            try {
+                setUser(JSON.parse(storedUser))
+            } catch {
+                router.push("/login")
+                return
+            }
         }
 
         setLoading(false)
-    }, [router])
+    }, [router, user])
 
     function logout() {
         localStorage.removeItem("token")

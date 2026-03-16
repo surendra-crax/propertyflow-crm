@@ -51,6 +51,25 @@ export class SiteVisitsService {
 
   }
 
+  async getCalendarVisits(startDate: Date, endDate: Date, agentId?: string) {
+    const where: any = {
+      visitDate: {
+        gte: startDate,
+        lte: endDate
+      }
+    };
+    if (agentId) where.agentId = agentId;
+
+    return this.prisma.siteVisit.findMany({
+      where,
+      include: {
+        lead: true,
+        agent: { select: { name: true } }
+      },
+      orderBy: { visitDate: "asc" }
+    })
+  }
+
   async updateStatus(id: string, status: VisitStatus) {
 
     return this.prisma.siteVisit.update({

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { api } from "../../../lib/api"
-import { Building2 } from "lucide-react"
+import { Building2, DollarSign, Wallet } from "lucide-react"
+import Link from "next/link"
+import { Button } from "../../../components/ui/button"
 
 export default function BrokersPage() {
   const [brokers, setBrokers] = useState<any[]>([])
@@ -67,6 +69,14 @@ export default function BrokersPage() {
                     <span className="text-slate-400">Revenue Generated</span>
                     <span className="text-emerald-600 font-medium">₹{(totalRevenue / 100000).toFixed(1)}L</span>
                   </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-100 flex gap-2">
+                  <Link href={`/brokers/${broker.id}/commissions`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
+                      <Wallet className="w-3.5 h-3.5" />
+                      Commissions
+                    </Button>
+                  </Link>
                 </div>
               </div>
             )

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Req } from '@nestjs/common'
+import { Controller, Post, Get, Body, UseGuards, Req, Param } from '@nestjs/common'
 import { DealsService } from './deals.service'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { RolesGuard } from '../auth/roles.guard'
@@ -20,5 +20,11 @@ export class DealsController {
   @Get()
   findAll() {
     return this.dealsService.getDeals()
+  }
+
+  @Roles('ADMIN', 'MANAGER', 'AGENT', 'BROKER')
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.dealsService.getDealById(id)
   }
 }

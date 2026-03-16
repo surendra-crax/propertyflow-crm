@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { api } from "../../../lib/api"
-import { Handshake, TrendingUp } from "lucide-react"
+import { Handshake, TrendingUp, CreditCard, FileText } from "lucide-react"
+import Link from "next/link"
+import { Button } from "../../../components/ui/button"
 
 export default function DealsPage() {
   const [deals, setDeals] = useState<any[]>([])
@@ -14,6 +16,21 @@ export default function DealsPage() {
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
+
+  async function handleExport() {
+    try {
+      const res = await api.get('/exports/deals', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'deals.csv')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      console.error("Export failed", err)
+    }
+  }
 
   const totalRevenue = deals.reduce((sum, d) => sum + d.saleValue, 0)
   const avgDealSize = deals.length > 0 ? totalRevenue / deals.length : 0
@@ -33,9 +50,17 @@ export default function DealsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-slate-800 dark:text-white">Deals</h1>
-        <p className="text-sm text-slate-400 dark:text-slate-500">{deals.length} closed deals</p>
+      <div className="flex justify-between items-center gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white">Deals</h1>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{deals.length} closed deals</p>
+        </div>
+        <button
+          onClick={handleExport}
+          className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+        >
+          <FileText className="w-4 h-4" /> Export CSV
+        </button>
       </div>
 
       {/* Summary Cards */}
@@ -104,6 +129,14 @@ export default function DealsPage() {
                 <div className="flex justify-between">
                   <span className="text-slate-400 dark:text-slate-500">Closed</span>
                   <span className="text-slate-600 dark:text-slate-300">{new Date(deal.closedAt).toLocaleDateString()}</span>
+                </div>
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <Link href={`/deals/${deal.id}/payments`}>
+                    <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
+                      <CreditCard className="w-3.5 h-3.5" />
+                      Payment History
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>

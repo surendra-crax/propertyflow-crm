@@ -95,6 +95,12 @@ export default function LandingPage() {
                   Request Demo
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </button>
+                <Link
+                  href="/demo-login"
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-7 py-4 rounded-xl text-sm font-bold transition-all border border-white/15 backdrop-blur-sm"
+                >
+                  View Live Demo
+                </Link>
 
               </div>
 
@@ -562,6 +568,12 @@ export default function LandingPage() {
               Request Demo
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </button>
+            <Link
+              href="/demo-login"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl text-base transition-all border border-white/20 backdrop-blur-sm"
+            >
+              View Live Demo
+            </Link>
 
           </div>
         </div>

@@ -68,6 +68,12 @@ export default function LandingNavbar() {
                     )}
 
                     <div className="flex items-center gap-4">
+                        <Link
+                            href="/demo-login"
+                            className={`text-sm font-medium transition-colors ${isScrolled ? 'text-slate-600 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400' : 'text-white/80 hover:text-white'}`}
+                        >
+                            Demo CRM
+                        </Link>
 
                         <a
                             href="#contact-form"
@@ -102,6 +108,13 @@ export default function LandingNavbar() {
             {mobileMenuOpen && (
                 <div className="md:hidden absolute top-20 left-0 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-xl flex flex-col items-center py-6 px-6 gap-6">
                     <div className="flex flex-col gap-4 w-full mt-2">
+                        <Link
+                            href="/demo-login"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="w-full text-center py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium"
+                        >
+                            Demo CRM
+                        </Link>
 
                         <a
                             href="#contact-form"

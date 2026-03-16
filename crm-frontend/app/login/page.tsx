@@ -117,6 +117,28 @@ export default function LoginPage() {
           </button>
 
 
+          {/* Demo credentials */}
+          <div className="border-t border-white/10 pt-4 mt-4">
+            <p className="text-[11px] text-slate-500 text-center mb-2 uppercase tracking-wider">Demo Accounts</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => { setEmail("admin@crm.com"); setPassword("admin123") }}
+                className="bg-white/5 border border-white/10 rounded-lg p-2 text-left hover:bg-white/10 transition-all group"
+              >
+                <p className="text-[10px] font-bold text-indigo-400 group-hover:text-indigo-300">Admin Account</p>
+                <p className="text-[9px] text-slate-500 truncate">admin@crm.com</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail("agent@crm.com"); setPassword("agent123") }}
+                className="bg-white/5 border border-white/10 rounded-lg p-2 text-left hover:bg-white/10 transition-all group"
+              >
+                <p className="text-[10px] font-bold text-purple-400 group-hover:text-purple-300">Agent Account</p>
+                <p className="text-[9px] text-slate-500 truncate">agent@crm.com</p>
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>

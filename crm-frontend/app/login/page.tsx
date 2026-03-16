@@ -118,24 +118,52 @@ export default function LoginPage() {
 
 
           {/* Demo credentials */}
-          <div className="border-t border-white/10 pt-4 mt-4">
-            <p className="text-[11px] text-slate-500 text-center mb-2 uppercase tracking-wider">Demo Accounts</p>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="border-t border-white/10 pt-6 mt-6">
+            <p className="text-[11px] text-slate-500 text-center mb-4 uppercase tracking-[0.2em] font-semibold">Live Demo Accounts</p>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => { setEmail("admin@crm.com"); setPassword("admin123") }}
-                className="bg-white/5 border border-white/10 rounded-lg p-2 text-left hover:bg-white/10 transition-all group"
+                onClick={() => { setEmail("admin@propertyflow.com"); setPassword("password123") }}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:bg-white/10 hover:border-indigo-500/50 transition-all group"
               >
-                <p className="text-[10px] font-bold text-indigo-400 group-hover:text-indigo-300">Admin Account</p>
-                <p className="text-[9px] text-slate-500 truncate">admin@crm.com</p>
+                <p className="text-[11px] font-bold text-indigo-400 group-hover:text-indigo-300 flex items-center gap-1.5">
+                  Admin
+                  <ArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </p>
+                <p className="text-[9px] text-slate-500 truncate mt-0.5">admin@propertyflow.com</p>
               </button>
               <button
                 type="button"
-                onClick={() => { setEmail("agent@crm.com"); setPassword("agent123") }}
-                className="bg-white/5 border border-white/10 rounded-lg p-2 text-left hover:bg-white/10 transition-all group"
+                onClick={() => { setEmail("priya@propertyflow.com"); setPassword("password123") }}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:bg-white/10 hover:border-purple-500/50 transition-all group"
               >
-                <p className="text-[10px] font-bold text-purple-400 group-hover:text-purple-300">Agent Account</p>
-                <p className="text-[9px] text-slate-500 truncate">agent@crm.com</p>
+                <p className="text-[11px] font-bold text-purple-400 group-hover:text-purple-300 flex items-center gap-1.5">
+                  Manager
+                  <ArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </p>
+                <p className="text-[9px] text-slate-500 truncate mt-0.5">priya@propertyflow.com</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail("amit@propertyflow.com"); setPassword("password123") }}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:bg-white/10 hover:border-emerald-500/50 transition-all group"
+              >
+                <p className="text-[11px] font-bold text-emerald-400 group-hover:text-emerald-300 flex items-center gap-1.5">
+                  Agent
+                  <ArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </p>
+                <p className="text-[9px] text-slate-500 truncate mt-0.5">amit@propertyflow.com</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEmail("sunil@brokers.com"); setPassword("password123") }}
+                className="bg-white/5 border border-white/10 rounded-xl p-3 text-left hover:bg-white/10 hover:border-amber-500/50 transition-all group"
+              >
+                <p className="text-[11px] font-bold text-amber-400 group-hover:text-amber-300 flex items-center gap-1.5">
+                  Broker
+                  <ArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </p>
+                <p className="text-[9px] text-slate-500 truncate mt-0.5">sunil@brokers.com</p>
               </button>
             </div>
           </div>

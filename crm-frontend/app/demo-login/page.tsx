@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, ArrowRight } from "lucide-react";
 import { api } from "../../lib/api";
@@ -9,20 +9,36 @@ export default function DemoLoginPage() {
     const router = useRouter();
 
     // Auto-fill logic when user clicks the credentials
-    const handleLogin = async (e: React.FormEvent, role: 'admin' | 'agent') => {
+    const [loadingRole, setLoadingRole] = useState<string | null>(null);
+
+    const handleLogin = async (e: React.FormEvent, role: string) => {
         e.preventDefault();
-        const email = role === 'admin' ? 'demo@crm.com' : 'agent@crm.com';
-        const password = 'demo123';
+        setLoadingRole(role);
+        
+        let email = 'admin@propertyflow.com';
+        let password = 'password123';
+
+        if (role === 'manager') email = 'priya@propertyflow.com';
+        if (role === 'agent') email = 'amit@propertyflow.com';
+        if (role === 'broker') email = 'sunil@brokers.com';
 
         try {
             const res = await api.post("/auth/login", { email, password });
-            localStorage.setItem("token", res.data.token);
-            localStorage.setItem("user", JSON.stringify(res.data.user));
-            localStorage.setItem("userId", res.data.user.id);
-            localStorage.setItem("role", res.data.user.role);
+            
+            const token = res.data.access_token;
+            const user = res.data.user;
+
+            localStorage.clear();
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("userId", user.id);
+            localStorage.setItem("role", user.role);
+            
             router.push("/dashboard");
-        } catch {
-            alert('Demo login failed. Make sure the backend is seeded and running.');
+        } catch (err) {
+            console.error(err);
+            alert('Demo login failed. Please ensure the backend server is running and seeded.');
+            setLoadingRole(null);
         }
     };
 
@@ -56,33 +72,97 @@ export default function DemoLoginPage() {
                 <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-xl flex flex-col gap-6">
                     <div className="text-center mb-2">
                         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Choose your role</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Select a role to see different permission levels.</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Explore PropertyFlow with different access levels.</p>
                     </div>
 
-                    {/* Admin Demo Card */}
-                    <div
-                        onClick={(e) => handleLogin(e, 'admin')}
-                        className="group flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 cursor-pointer transition-all hover:shadow-md bg-slate-50 dark:bg-slate-900/50"
-                    >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 px-2.5 py-1 rounded-md">Management View</span>
-                            <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-transform group-hover:translate-x-1" />
-                        </div>
-                        <h3 className="font-semibold text-slate-800 dark:text-white text-lg">Admin / Manager</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Full access to pipeline, analytics, agents, and CSV exports.</p>
-                    </div>
+                    <div className="grid grid-cols-1 gap-4">
+                        {/* Admin Demo Card */}
+                        <button
+                            disabled={!!loadingRole}
+                            onClick={(e) => handleLogin(e, 'admin')}
+                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
+                                loadingRole === 'admin' 
+                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/40' 
+                                : 'border-slate-100 dark:border-slate-700 hover:border-indigo-500 bg-slate-50 dark:bg-slate-900/50'
+                            }`}
+                        >
+                            <div className="flex-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 px-2 py-0.5 rounded-md">Full Control</span>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">System Admin</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage projects, agents, and view all company reports.</p>
+                            </div>
+                            {loadingRole === 'admin' ? (
+                                <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                            )}
+                        </button>
 
-                    {/* Agent Demo Card */}
-                    <div
-                        onClick={(e) => handleLogin(e, 'agent')}
-                        className="group flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 cursor-pointer transition-all hover:shadow-md bg-slate-50 dark:bg-slate-900/50"
-                    >
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 rounded-md">Sales View</span>
-                            <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-transform group-hover:translate-x-1" />
-                        </div>
-                        <h3 className="font-semibold text-slate-800 dark:text-white text-lg">Sales Agent</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Focused view for daily tasks, assigned leads, and personal pipeline.</p>
+                        {/* Manager Demo Card */}
+                        <button
+                            disabled={!!loadingRole}
+                            onClick={(e) => handleLogin(e, 'manager')}
+                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
+                                loadingRole === 'manager' 
+                                ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/40' 
+                                : 'border-slate-100 dark:border-slate-700 hover:border-purple-500 bg-slate-50 dark:bg-slate-900/50'
+                            }`}
+                        >
+                            <div className="flex-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/50 px-2 py-0.5 rounded-md">Management</span>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">Sales Manager</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track team pipeline, performance analytics, and deals.</p>
+                            </div>
+                            {loadingRole === 'manager' ? (
+                                <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+                            )}
+                        </button>
+
+                        {/* Agent Demo Card */}
+                        <button
+                            disabled={!!loadingRole}
+                            onClick={(e) => handleLogin(e, 'agent')}
+                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
+                                loadingRole === 'agent' 
+                                ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/40' 
+                                : 'border-slate-100 dark:border-slate-700 hover:border-emerald-500 bg-slate-50 dark:bg-slate-900/50'
+                            }`}
+                        >
+                            <div className="flex-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md">Sales Agent</span>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">Property Advisor</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage daily leads, site visits, and follow-ups.</p>
+                            </div>
+                            {loadingRole === 'agent' ? (
+                                <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                            )}
+                        </button>
+
+                        {/* Broker Demo Card */}
+                        <button
+                            disabled={!!loadingRole}
+                            onClick={(e) => handleLogin(e, 'broker')}
+                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
+                                loadingRole === 'broker' 
+                                ? 'border-amber-600 bg-amber-50 dark:bg-amber-900/40' 
+                                : 'border-slate-100 dark:border-slate-700 hover:border-amber-500 bg-slate-50 dark:bg-slate-900/50'
+                            }`}
+                        >
+                            <div className="flex-1">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-md">Partner Access</span>
+                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">External Broker</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Submit leads and track your project-wide commissions.</p>
+                            </div>
+                            {loadingRole === 'broker' ? (
+                                <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
+                            )}
+                        </button>
                     </div>
 
                     <button

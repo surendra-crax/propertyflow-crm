@@ -71,7 +71,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {/* Left — Copy */}
-            <div className="max-w-xl">
+            <div className="max-w-xl flex flex-col items-center lg:items-start text-center lg:text-left mx-auto lg:ml-0">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold mb-6 border border-white/15 text-indigo-200">
                 <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
                 Real Estate Sales Operating System
@@ -99,7 +99,7 @@ export default function LandingPage() {
               </div>
 
               {/* Trust signals */}
-              <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-400">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-3 text-sm text-slate-400">
                 {[
                   { icon: Check, text: "No per-user fees" },
                   { icon: Check, text: "Full data ownership" },

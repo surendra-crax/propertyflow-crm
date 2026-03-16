@@ -193,8 +193,8 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SOCIAL PROOF BAR ─── */}
-      <section className="bg-slate-900 border-y border-slate-800 py-6">
-        <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-center gap-8 md:gap-12 text-center">
+      <section className="bg-slate-900 border-y border-slate-800 py-10 md:py-8">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 lg:flex justify-items-center gap-y-8 gap-x-4 md:gap-12 text-center items-center lg:justify-center">
           {[
             { value: "500+", label: "Real Estate Teams" },
             { value: "₹450Cr+", label: "Revenue Tracked" },
@@ -322,7 +322,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-0 relative">
+          <div className="flex flex-col md:flex-row items-center gap-0 relative">
             {[
               { step: "1", icon: Zap, title: "Lead Captured", desc: "Enquiries from ads, website forms, and portals are captured automatically.", color: "bg-blue-500" },
               { step: "2", icon: Users, title: "Agent Assigned", desc: "Assignment rules route the lead to the best available agent instantly.", color: "bg-indigo-500" },

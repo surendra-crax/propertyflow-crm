@@ -1,7 +1,6 @@
 # PropertyFlow CRM — Project Overview
 
 **Built by WebXAI** | [webxaitech.com](https://webxaitech.com)
-**Live Demo:** [propertyflow.webxaitech.com](https://propertyflow.webxaitech.com)
 
 ---
 
@@ -80,7 +79,7 @@ User Browser
 Vercel CDN (propertyflow.webxaitech.com)
     │   Next.js Frontend
     │   - Landing page (public)
-    │   - Login / Demo login
+    │   - Login (authenticated)
     │   - CRM dashboard (authenticated)
     │
     ▼ REST API calls (JWT-authenticated)
@@ -101,8 +100,8 @@ Supabase (PostgreSQL)
 
 ### Authentication Flow
 1. User visits `propertyflow.webxaitech.com` → sees the **Landing Page**
-2. Clicks "View Live Demo" → reaches Demo Login page
-3. Selects a role (Admin or Agent) → frontend sends credentials to `/auth/login`
+2. Clicks "Sign In" → reaches Login page
+3. Enters company credentials → frontend sends credentials to `/auth/login`
 4. Backend validates credentials, returns a **JWT token**
 5. Token stored in `localStorage` — all subsequent API calls attach it via `Authorization: Bearer <token>`
 6. Role-based guards on the backend control what each user can access

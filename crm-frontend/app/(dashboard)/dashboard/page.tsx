@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { api } from "../../../lib/api"
-import { useAuth } from "../../../components/auth/auth-provider"
+import { api } from "@/lib/api"
+import { useAuth } from "@/components/auth/auth-provider"
 import { TrendingUp, Users, Handshake, Target, BarChart3, CalendarCheck, AlertTriangle } from "lucide-react"
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { api } from "../../../lib/api"
-import CreateLeadModal from "../../../components/leads/create-lead-modal"
-import { Target, Phone, Calendar, Search, Filter, MessageSquare, FileText } from "lucide-react"
+import { api } from "@/lib/api"
+import CreateLeadModal from "@/components/leads/create-lead-modal"
+import { Target, Phone, Calendar, Search, Filter, MessageSquare, FileText, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 
 const statusColors: Record<string, string> = {
@@ -19,6 +19,7 @@ const statusColors: Record<string, string> = {
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("ALL")
@@ -27,18 +28,18 @@ export default function LeadsPage() {
   const [meta, setMeta] = useState<any>(null)
 
   async function loadLeads() {
-    setLoading(true)
+    setRefreshing(true)
     try {
       const res = await api.get("/leads", {
         params: { page, limit: 24, status: statusFilter, search }
       })
-      setLeads(res.data.data || [])
-      setMeta(res.data.meta || null)
+      setLeads(res.data.data)
+      setMeta(res.data.meta)
     } catch (err) {
       console.error(err)
-      setLeads([])
     }
     setLoading(false)
+    setRefreshing(false)
   }
 
   useEffect(() => {
@@ -112,7 +113,7 @@ export default function LeadsPage() {
               setSearch(e.target.value)
               setPage(1)
             }}
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 dark:focus:border-indigo-500/50"
+            className={`w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 dark:focus:border-indigo-500/50 transition-opacity ${refreshing ? "opacity-70" : "opacity-100"}`}
           />
         </div>
         <select

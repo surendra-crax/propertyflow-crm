@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { api } from "../../../lib/api"
+import { api } from "@/lib/api"
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd"
 import Link from "next/link"
 import { Flame, Thermometer, Snowflake } from "lucide-react"

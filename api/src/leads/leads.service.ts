@@ -197,13 +197,24 @@ export class LeadsService {
 
   async getPipeline() {
     const leads = await this.prisma.lead.findMany({
-      include: {
-        project: true,
+      select: {
+        id: true,
+        fullName: true,
+        phone: true,
+        status: true,
+        budgetMin: true,
+        budgetMax: true,
+        temperature: true,
+        score: true,
+        project: {
+          select: { name: true }
+        },
         assignedAgent: {
-          select: { id: true, name: true, email: true }
+          select: { name: true }
         }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { updatedAt: 'desc' },
+      take: 1000 // Limit for performance safety
     })
 
     const pipeline: Record<string, any[]> = {
@@ -216,9 +227,11 @@ export class LeadsService {
       CLOSED_LOST: []
     }
 
-    for (const lead of leads) {
-      pipeline[lead.status].push(lead)
-    }
+    leads.forEach(lead => {
+      if (pipeline[lead.status]) {
+        pipeline[lead.status].push(lead)
+      }
+    })
 
     return pipeline
   }

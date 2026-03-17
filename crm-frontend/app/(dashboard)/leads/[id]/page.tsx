@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
-import { api } from "../../../../lib/api"
-import { ArrowLeft, Phone, Mail, Calendar, User, Clock, Tag, MessageSquare } from "lucide-react"
+import { api } from "@/lib/api"
+import { useAuth } from "@/components/auth/auth-provider"
+import { TrendingUp, Users, Handshake, Target, BarChart3, CalendarCheck, AlertTriangle, ArrowLeft, Phone, Mail, Calendar, User, Clock, Tag, MessageSquare } from "lucide-react"
 import Link from "next/link"
-import { DocumentManager } from "../../../../components/shared/document-manager"
+import { DocumentManager } from "@/components/shared/document-manager"
 
 const statusColors: Record<string, string> = {
   NEW: "bg-blue-100 text-blue-700",

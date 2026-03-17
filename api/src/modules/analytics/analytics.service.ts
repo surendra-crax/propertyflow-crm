@@ -99,39 +99,41 @@ export class AnalyticsService {
   }
 
   async getAgentLeaderboard(month?: string) {
+    const where: any = {};
+    if (month && month !== 'ALL') {
+      const m = parseInt(month, 10);
+      const year = new Date().getFullYear();
+      where.closedAt = {
+        gte: new Date(year, m - 1, 1),
+        lt: new Date(year, m, 1),
+      };
+    }
+
     const agents = await this.prisma.user.findMany({
       where: { role: 'AGENT' },
-      include: {
-        leads: {
-          include: { deal: true }
-        },
-        visits: true
-      }
+      select: { id: true, name: true }
     });
 
-    const leaderboard = agents.map(agent => {
-      let currentLeads = agent.leads;
-      let currentVisits = agent.visits;
-      let currentDeals = agent.leads.filter(l => l.deal !== null).map(l => l.deal);
-
-      if (month && month !== 'ALL') {
-         const m = parseInt(month, 10);
-         currentLeads = currentLeads.filter(l => new Date(l.createdAt).getMonth() + 1 === m);
-         currentVisits = currentVisits.filter(v => new Date(v.createdAt).getMonth() + 1 === m);
-         currentDeals = currentDeals.filter(d => new Date(d!.closedAt).getMonth() + 1 === m);
-      }
-
-      const revenue = currentDeals.reduce((sum, d) => sum + (d?.saleValue || 0), 0);
+    const leaderboard = await Promise.all(agents.map(async (agent) => {
+      const [leadsCount, deals] = await Promise.all([
+        this.prisma.lead.count({ where: { assignedAgentId: agent.id } }),
+        this.prisma.deal.findMany({
+          where: { 
+            lead: { assignedAgentId: agent.id },
+            ...where
+          },
+          select: { saleValue: true }
+        })
+      ]);
 
       return {
         id: agent.id,
         name: agent.name,
-        leads: currentLeads.length,
-        visits: currentVisits.length,
-        deals: currentDeals.length,
-        revenue
+        leads: leadsCount,
+        deals: deals.length,
+        revenue: deals.reduce((sum, d) => sum + d.saleValue, 0)
       };
-    });
+    }));
 
     leaderboard.sort((a, b) => b.revenue - a.revenue);
 
@@ -139,7 +141,13 @@ export class AnalyticsService {
   }
 
   async getMonthlyRevenue() {
+    const year = new Date().getFullYear();
     const deals = await this.prisma.deal.findMany({
+      where: {
+        closedAt: {
+          gte: new Date(year, 0, 1)
+        }
+      },
       select: { saleValue: true, closedAt: true }
     });
 
@@ -164,29 +172,33 @@ export class AnalyticsService {
   }
 
   async pipelineForecast() {
-    const leads = await this.prisma.lead.findMany({
+    const result = await this.prisma.lead.groupBy({
+      by: ['status'],
       where: {
         status: {
           in: ['FOLLOW_UP', 'SITE_VISIT_DONE', 'NEGOTIATION']
         }
+      },
+      _sum: {
+        budgetMin: true,
+        budgetMax: true
       }
     });
 
-    const stages: Record<string, number> = {
+    const stagesMap: Record<string, number> = {
       FOLLOW_UP: 0,
       SITE_VISIT_DONE: 0,
       NEGOTIATION: 0
     };
 
-    leads.forEach(lead => {
-      const avgValue = (lead.budgetMin + lead.budgetMax) / 2;
-      stages[lead.status] += avgValue;
+    result.forEach(r => {
+      stagesMap[r.status] = ((r._sum.budgetMin || 0) + (r._sum.budgetMax || 0)) / 2;
     });
 
     return [
-      { stage: 'Follow Up', value: stages.FOLLOW_UP },
-      { stage: 'Site Visit', value: stages.SITE_VISIT_DONE },
-      { stage: 'Negotiation', value: stages.NEGOTIATION },
+      { stage: 'Follow Up', value: stagesMap.FOLLOW_UP },
+      { stage: 'Site Visit', value: stagesMap.SITE_VISIT_DONE },
+      { stage: 'Negotiation', value: stagesMap.NEGOTIATION },
     ];
   }
 

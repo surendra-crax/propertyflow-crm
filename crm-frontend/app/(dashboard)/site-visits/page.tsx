@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { api } from "../../../lib/api"
+import { api } from "@/lib/api"
 import { MapPin, Calendar, User, List } from "lucide-react"
-import { SiteVisitCalendar } from "../../../components/site-visits/calendar-view"
+import { SiteVisitCalendar } from "@/components/site-visits/calendar-view"
 
 const statusColors: Record<string, string> = {
   SCHEDULED: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-900/30",

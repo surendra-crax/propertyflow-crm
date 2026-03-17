@@ -1,245 +1,150 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { api } from "../../lib/api"
-import { X } from "lucide-react"
+import { api } from "../../../lib/api"
+import CreateLeadModal from "../../../components/leads/create-lead-modal"
+import { Target, Phone, Calendar, Search, Filter, MessageSquare, FileText } from "lucide-react"
+import Link from "next/link"
 
-const SOURCES = ["WEBSITE", "FACEBOOK_ADS", "GOOGLE_ADS", "BROKER", "REFERRAL", "WALK_IN"]
-const PROPERTY_TYPES = ["FLAT", "VILLA", "PLOT", "COMMERCIAL"]
+const statusColors: Record<string, string> = {
+  NEW: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-900/30",
+  CONTACTED: "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-900/30",
+  FOLLOW_UP: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-900/30",
+  SITE_VISIT_DONE: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-900/30",
+  NEGOTIATION: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-900/30",
+  CLOSED_WON: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-900/30",
+  CLOSED_LOST: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-900/30",
+}
 
-export default function CreateLeadModal({ onClose, onCreated }: any) {
-  const [projects, setProjects] = useState<any[]>([])
-  const [agents, setAgents] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
+export default function LeadsPage() {
+  const [leads, setLeads] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showCreate, setShowCreate] = useState(false)
+  const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("ALL")
 
-  const [form, setForm] = useState({
-    fullName: "",
-    phone: "",
-    email: "",
-    budgetMin: "",
-    budgetMax: "",
-    propertyType: "FLAT",
-    source: "WEBSITE",
-    notes: "",
-    projectId: "",
-    assignedAgentId: "",
-    nextFollowup: "",
-  })
+  const [page, setPage] = useState(1)
+  const [meta, setMeta] = useState<any>(null)
 
-  useEffect(() => {
-    loadDropdowns()
-  }, [])
-
-  async function loadDropdowns() {
-    try {
-      const [projRes, agentRes] = await Promise.all([
-        api.get("/projects"),
-        api.get("/users/agents"),
-      ])
-      setProjects(projRes.data)
-      setAgents(agentRes.data)
-
-      if (projRes.data.length > 0) {
-        setForm(f => ({ ...f, projectId: projRes.data[0].id }))
-      }
-      if (agentRes.data.length > 0) {
-        setForm(f => ({ ...f, assignedAgentId: agentRes.data[0].id }))
-      }
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  async function handleSubmit(e: any) {
-    e.preventDefault()
+  async function loadLeads() {
     setLoading(true)
-
     try {
-      await api.post("/leads", {
-        ...form,
-        budgetMin: Number(form.budgetMin),
-        budgetMax: Number(form.budgetMax),
-        nextFollowup: form.nextFollowup || undefined,
-        notes: form.notes || undefined,
+      const res = await api.get("/leads", {
+        params: { page, limit: 24, status: statusFilter, search }
       })
-      onCreated()
-      onClose()
+
+      // ✅ SAFE FIX
+      setLeads(res?.data?.data || [])
+      setMeta(res?.data?.meta || null)
+
     } catch (err) {
       console.error(err)
+      setLeads([]) // fallback
     }
-
     setLoading(false)
   }
 
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      loadLeads()
+    }, 300)
+    return () => clearTimeout(delay)
+  }, [page, statusFilter, search])
+
+  async function handleExport() {
+    try {
+      const res = await api.get('/exports/leads', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'leads.csv')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err) {
+      console.error("Export failed", err)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-12 bg-white dark:bg-slate-900 rounded-xl animate-pulse border dark:border-slate-800" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            <div key={i} className="h-48 bg-white dark:bg-slate-900 rounded-xl border dark:border-slate-800 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-lg font-semibold text-slate-800">Create New Lead</h2>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-600">
-            <X className="w-5 h-5" />
-          </button>
+    <div className="space-y-5">
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white">Leads</h1>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{meta?.total || 0} total leads</p>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
-          {/* Name & Phone */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Full Name *</label>
-              <input
-                required
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                value={form.fullName}
-                onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Phone *</label>
-              <input
-                required
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="text-xs font-medium text-slate-500 mb-1 block">Email</label>
-            <input
-              type="email"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </div>
-
-          {/* Budget */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Budget Min (₹) *</label>
-              <input
-                required
-                type="number"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                value={form.budgetMin}
-                onChange={(e) => setForm({ ...form, budgetMin: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Budget Max (₹) *</label>
-              <input
-                required
-                type="number"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-                value={form.budgetMax}
-                onChange={(e) => setForm({ ...form, budgetMax: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Property Type & Source */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Property Type</label>
-              <select
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                value={form.propertyType}
-                onChange={(e) => setForm({ ...form, propertyType: e.target.value })}
-              >
-                {PROPERTY_TYPES.map(t => (
-                  <option key={t} value={t}>{t.charAt(0) + t.slice(1).toLowerCase()}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Lead Source</label>
-              <select
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                value={form.source}
-                onChange={(e) => setForm({ ...form, source: e.target.value })}
-              >
-                {SOURCES.map(s => (
-                  <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Project & Agent */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Project *</label>
-              <select
-                required
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                value={form.projectId}
-                onChange={(e) => setForm({ ...form, projectId: e.target.value })}
-              >
-                {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Assigned Agent *</label>
-              <select
-                required
-                className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                value={form.assignedAgentId}
-                onChange={(e) => setForm({ ...form, assignedAgentId: e.target.value })}
-              >
-                {agents.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Follow-up Date */}
-          <div>
-            <label className="text-xs font-medium text-slate-500 mb-1 block">Next Follow-up</label>
-            <input
-              type="datetime-local"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300"
-              value={form.nextFollowup}
-              onChange={(e) => setForm({ ...form, nextFollowup: e.target.value })}
-            />
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="text-xs font-medium text-slate-500 mb-1 block">Notes</label>
-            <textarea
-              rows={3}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 resize-none"
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            Cancel
+        <div className="flex gap-3">
+          <button onClick={handleExport} className="flex items-center gap-2 bg-white dark:bg-slate-900 border px-4 py-2.5 rounded-lg text-sm">
+            <FileText className="w-4 h-4" /> Export
           </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-indigo-500 hover:to-purple-500 transition-all disabled:opacity-50"
-          >
-            {loading ? "Creating..." : "Create Lead"}
+          <button onClick={() => setShowCreate(true)} className="bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm">
+            + Create Lead
           </button>
         </div>
-      </form>
+      </div>
+
+      {/* Leads */}
+      {(leads?.length || 0) === 0 ? (
+        <div className="text-center py-10">
+          <Target className="mx-auto mb-2" />
+          No leads found
+        </div>
+      ) : (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {(leads || []).map((lead) => (
+            <div key={lead?.id}>
+
+              <p>{lead?.fullName || "-"}</p>
+              <p>{lead?.phone || "-"}</p>
+
+              <span>
+                {(lead?.status || "").replace(/_/g, " ")}
+              </span>
+
+              <p>
+                ₹{((lead?.budgetMin || 0) / 100000).toFixed(0)}L - ₹{((lead?.budgetMax || 0) / 100000).toFixed(0)}L
+              </p>
+
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {meta?.totalPages > 1 && (
+        <div className="flex justify-between">
+          <button onClick={() => setPage(p => Math.max(1, p - 1))}>
+            Previous
+          </button>
+          <button onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}>
+            Next
+          </button>
+        </div>
+      )}
+
+      {showCreate && (
+        <CreateLeadModal
+          onClose={() => setShowCreate(false)}
+          onCreated={loadLeads}
+        />
+      )}
+
     </div>
   )
 }

@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
+import { AuditLogService } from '../modules/audit-log/audit-log.service'
 
 @Injectable()
 export class DealsService {
 
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private auditLog: AuditLogService
+  ) { }
 
   async createDeal(data: {
     leadId: string
@@ -59,6 +63,15 @@ export class DealsService {
         }
       })
     }
+
+    // Audit log
+    await this.auditLog.log({
+      userId,
+      action: 'DEAL_CREATED',
+      entityType: 'DEAL',
+      entityId: deal.id,
+      newValue: { saleValue: deal.saleValue, leadId: deal.leadId }
+    })
 
     return deal
   }

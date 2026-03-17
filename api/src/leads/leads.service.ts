@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateLeadDto } from './dto/create-lead.dto'
 import { LeadStatus, LeadSource, PropertyType, LeadTemperature } from '@prisma/client'
+import { AuditLogService } from '../modules/audit-log/audit-log.service'
 
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private auditLog: AuditLogService
+  ) { }
 
   private calculateLeadScore(lead: any): { score: number, temperature: LeadTemperature } {
     let score = 0;
@@ -78,6 +82,15 @@ export class LeadsService {
       })
     }
 
+    // Audit log
+    await this.auditLog.log({
+      userId,
+      action: 'LEAD_CREATED',
+      entityType: 'LEAD',
+      entityId: lead.id,
+      newValue: { fullName: lead.fullName, status: lead.status }
+    })
+
     return leadWithScore
   }
 
@@ -103,25 +116,18 @@ export class LeadsService {
           project: true,
           assignedAgent: {
             select: { id: true, name: true, email: true, role: true }
+          },
+          activities: {
+              orderBy: { createdAt: 'desc' },
+              take: 5
           }
         },
-        orderBy: [
-          { score: 'desc' },
-          { createdAt: 'desc' }
-        ]
+        orderBy: { updatedAt: 'desc' }
       }),
       this.prisma.lead.count({ where })
     ]);
 
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    };
+    return { data, total, page, limit };
   }
 
   async getLeadById(id: string) {
@@ -132,205 +138,56 @@ export class LeadsService {
         assignedAgent: {
           select: { id: true, name: true, email: true, role: true }
         },
-        visits: {
-          include: {
-            agent: {
-              select: { id: true, name: true }
-            }
-          },
-          orderBy: { visitDate: 'desc' }
-        },
         activities: {
-          include: {
-            user: {
-              select: { id: true, name: true }
-            }
-          },
+          include: { user: { select: { name: true } } },
           orderBy: { createdAt: 'desc' }
         },
+        visits: {
+          include: { agent: { select: { name: true } } },
+          orderBy: { visitDate: 'desc' }
+        },
         deal: {
-          include: {
-            project: true,
-            broker: true,
-          }
+          include: { project: true }
         }
       }
-    })
+    });
   }
 
-  async updateLeadStatus(id: string, status: any, userId?: string) {
-    const currentLead = await this.prisma.lead.findUnique({ where: { id }});
-    const { score, temperature } = this.calculateLeadScore({ ...currentLead, status });
-
+  async updateLead(id: string, data: any, userId?: string) {
+    const oldLead = await this.prisma.lead.findUnique({ where: { id } });
+    
     const lead = await this.prisma.lead.update({
       where: { id },
-      data: { status, score, temperature },
+      data,
       include: {
-        assignedAgent: { select: { name: true } }
+        project: true,
+        assignedAgent: {
+          select: { id: true, name: true, email: true, role: true }
+        }
       }
-    })
+    });
 
-    // Log activity
-    if (userId) {
+    if (userId && data.status && data.status !== oldLead?.status) {
       await this.prisma.activity.create({
         data: {
           leadId: id,
           userId,
-          type: 'STATUS_CHANGE',
-          description: `Lead status changed to ${status}`,
+          type: 'STATUS_UPDATED',
+          description: `Lead status updated from ${oldLead?.status} to ${data.status}`,
         }
-      })
+      });
+
+      // Audit log
+      await this.auditLog.log({
+        userId,
+        action: 'LEAD_STATUS_UPDATED',
+        entityType: 'LEAD',
+        entityId: id,
+        oldValue: { status: oldLead?.status },
+        newValue: { status: data.status }
+      });
     }
 
-    return lead
-  }
-
-  async updateLead(id: string, data: any) {
-    const currentLead = await this.prisma.lead.findUnique({ where: { id }});
-    const { score, temperature } = this.calculateLeadScore({ ...currentLead, ...data });
-
-    return this.prisma.lead.update({
-      where: { id },
-      data: { ...data, score, temperature }
-    })
-  }
-
-  async getPipeline() {
-    const leads = await this.prisma.lead.findMany({
-      select: {
-        id: true,
-        fullName: true,
-        phone: true,
-        status: true,
-        budgetMin: true,
-        budgetMax: true,
-        temperature: true,
-        score: true,
-        project: {
-          select: { name: true }
-        },
-        assignedAgent: {
-          select: { name: true }
-        }
-      },
-      orderBy: { updatedAt: 'desc' },
-      take: 1000 // Limit for performance safety
-    })
-
-    const pipeline: Record<string, any[]> = {
-      NEW: [],
-      CONTACTED: [],
-      FOLLOW_UP: [],
-      SITE_VISIT_DONE: [],
-      NEGOTIATION: [],
-      CLOSED_WON: [],
-      CLOSED_LOST: []
-    }
-
-    leads.forEach(lead => {
-      if (pipeline[lead.status]) {
-        pipeline[lead.status].push(lead)
-      }
-    })
-
-    return pipeline
-  }
-
-  async updateFollowup(id: string, date: string) {
-    return this.prisma.lead.update({
-      where: { id },
-      data: { nextFollowup: new Date(date) }
-    })
-  }
-
-  async getTodayFollowups() {
-    const startOfDay = new Date()
-    startOfDay.setHours(0, 0, 0, 0)
-
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
-
-    return this.prisma.lead.findMany({
-      where: {
-        nextFollowup: {
-          gte: startOfDay,
-          lte: endOfDay
-        }
-      },
-      include: {
-        project: true,
-        assignedAgent: {
-          select: { id: true, name: true, email: true }
-        }
-      },
-      orderBy: { nextFollowup: 'asc' }
-    })
-  }
-
-  async getOverdueFollowups() {
-    const now = new Date()
-    now.setHours(0, 0, 0, 0)
-
-    return this.prisma.lead.findMany({
-      where: {
-        nextFollowup: { lt: now },
-        status: { notIn: ['CLOSED_WON', 'CLOSED_LOST'] }
-      },
-      include: {
-        project: true,
-        assignedAgent: {
-          select: { id: true, name: true, email: true }
-        }
-      },
-      orderBy: { nextFollowup: 'asc' }
-    })
-  }
-
-  async checkDuplicate(phone?: string, email?: string) {
-    if (!phone && !email) return { duplicate: false }
-
-    const conditions: any[] = []
-    if (phone) conditions.push({ phone })
-    if (email) conditions.push({ email })
-
-    const existing = await this.prisma.lead.findFirst({
-      where: { OR: conditions },
-      include: {
-        project: { select: { name: true } },
-        assignedAgent: { select: { name: true } },
-      }
-    })
-
-    if (existing) return { duplicate: true, existing }
-    return { duplicate: false }
-  }
-
-  async mergeLeads(keepId: string, removeId: string) {
-    // Move activities
-    await this.prisma.activity.updateMany({
-      where: { leadId: removeId },
-      data: { leadId: keepId }
-    })
-
-    // Move visits
-    await this.prisma.siteVisit.updateMany({
-      where: { leadId: removeId },
-      data: { leadId: keepId }
-    })
-
-    // Add a merge activity
-    await this.prisma.activity.create({
-      data: {
-        leadId: keepId,
-        userId: keepId, // placeholder - ideally pass userId
-        type: 'MERGED',
-        description: `Lead merged from duplicate record ${removeId}`,
-      }
-    })
-
-    // Delete the duplicate
-    await this.prisma.lead.delete({ where: { id: removeId } })
-
-    return this.getLeadById(keepId)
+    return lead;
   }
 }

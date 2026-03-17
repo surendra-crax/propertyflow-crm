@@ -5,6 +5,8 @@ import { api } from "../../../lib/api"
 import { FolderKanban, MapPin, Building2 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "../../../components/ui/button"
+import CreateProjectModal from "../../../components/projects/create-project-modal"
+import { Plus } from "lucide-react"
 
 const statusColors: Record<string, string> = {
   PRELAUNCH: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-900/30",
@@ -15,13 +17,19 @@ const statusColors: Record<string, string> = {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => {
+    loadProjects()
+  }, [])
+
+  function loadProjects() {
+    setLoading(true)
     api.get("/projects").then(res => {
       setProjects(res.data)
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [])
+  }
 
   if (loading) {
     return (
@@ -33,10 +41,23 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-bold text-slate-800 dark:text-white">Projects</h1>
-        <p className="text-sm text-slate-400 dark:text-slate-500">{projects.length} projects</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white">Projects</h1>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{projects.length} projects</p>
+        </div>
+        <Button onClick={() => setShowAdd(true)} className="gap-2 bg-indigo-600 hover:bg-indigo-500 text-white">
+          <Plus className="w-4 h-4" />
+          Add Project
+        </Button>
       </div>
+
+      {showAdd && (
+        <CreateProjectModal 
+          onClose={() => setShowAdd(false)} 
+          onCreated={loadProjects} 
+        />
+      )}
 
       {projects.length === 0 ? (
         <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">

@@ -7,12 +7,14 @@ import Link from "next/link"
 import { Button } from "../../../../../components/ui/button"
 import { Badge } from "../../../../../components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../../components/ui/table"
+import AddUnitModal from "../../../../../components/projects/add-unit-modal"
 
 export default function projectUnitsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const [units, setUnits] = useState<any[]>([])
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -64,12 +66,20 @@ export default function projectUnitsPage({ params }: { params: Promise<{ id: str
               Visual Grid
             </Button>
           </Link>
-          <Button className="gap-2">
+          <Button onClick={() => setShowAdd(true)} className="gap-2">
             <Plus className="w-4 h-4" />
             Add Unit
           </Button>
         </div>
       </div>
+
+      {showAdd && (
+        <AddUnitModal 
+          projectId={id} 
+          onClose={() => setShowAdd(false)} 
+          onCreated={loadData} 
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <CardStat label="Total Units" value={units.length} />

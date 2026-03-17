@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { api } from "../../../../lib/api"
 import { PageHeader } from "../../../../components/shared/page-header"
-import { Key, Plus, Trash2, Copy, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { Key, Plus, Trash2, Copy, Eye, EyeOff, AlertCircle, Shield } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
 import { toastSuccess, toastError } from "../../../../lib/toast"
 
@@ -140,15 +140,59 @@ export default function ApiKeysPage() {
       </div>
 
       {/* Usage example */}
-      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-5">
-        <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-3">Usage</h4>
-        <pre className="text-xs font-mono text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto">
-{`POST /public/leads
-X-API-Key: pfcrm_your_key_here
-Content-Type: application/json
+      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+        <div>
+            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 mb-3">
+                <Shield className="w-4 h-4 text-indigo-500" />
+                Getting Started with API Keys
+            </h4>
+            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                <p>1. <strong>Generate a Key:</strong> Enter a recognizable label (e.g., "Main Website Form") and click Generate.</p>
+                <p>2. <strong>Copy and Secure:</strong> Copy the generated key immediately. We only show it once for your security.</p>
+                <p>3. <strong>Integrate:</strong> Use the key in your requests as an <code>X-API-Key</code> header.</p>
+            </div>
+        </div>
 
-{ "fullName": "...", "phone": "..." }`}
-        </pre>
+        <div>
+            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Suggested Platforms</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                    { name: "Zapier", desc: "Automation", icon: "⚡" },
+                    { name: "Make.com", desc: "Workflows", icon: "🛠️" },
+                    { name: "Twilio", desc: "WhatsApp/SMS", icon: "💬" },
+                    { name: "Resend", desc: "Transactional Email", icon: "📧" }
+                ].map(p => (
+                    <div key={p.name} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-lg text-center">
+                        <div className="text-xl mb-1">{p.icon}</div>
+                        <p className="font-bold text-slate-800 dark:text-slate-200 text-[11px]">{p.name}</p>
+                        <p className="text-[10px] text-slate-400">{p.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <div>
+            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">HTTP Example (Demo)</h4>
+            <pre className="text-[11px] font-mono text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-700 overflow-x-auto">
+{`// Create a lead from an external source
+fetch('https://api.propertyflow.com/public/leads', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': 'your_api_key_here'
+  },
+  body: JSON.stringify({
+    fullName: "Prospect Name",
+    phone: "+91 9876543210",
+    email: "prospect@example.com",
+    source: "WEBSITE",
+    notes: "Created via API"
+  })
+})
+.then(response => response.json())
+.then(data => console.log("Lead created:", data));`}
+            </pre>
+        </div>
       </div>
     </div>
   )

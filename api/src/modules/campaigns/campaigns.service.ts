@@ -10,11 +10,26 @@ export class CampaignsService {
   }
 
   async create(data: any) {
-    return this.prisma.campaign.create({ data });
+    const { startDate, endDate, ...rest } = data;
+    return this.prisma.campaign.create({
+      data: {
+        ...rest,
+        startDate: (startDate && startDate !== "") ? new Date(startDate) : null,
+        endDate: (endDate && endDate !== "") ? new Date(endDate) : null,
+      }
+    });
   }
 
   async update(id: string, data: any) {
-    return this.prisma.campaign.update({ where: { id }, data });
+    const { startDate, endDate, ...rest } = data;
+    return this.prisma.campaign.update({
+      where: { id },
+      data: {
+        ...rest,
+        startDate: (startDate && startDate !== "") ? new Date(startDate) : null,
+        endDate: (endDate && endDate !== "") ? new Date(endDate) : null,
+      }
+    });
   }
 
   async delete(id: string) {

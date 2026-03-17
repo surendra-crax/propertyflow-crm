@@ -10,12 +10,12 @@ export default function SettingsPage() {
     return (
         <div className="space-y-6 max-w-5xl">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-                <p className="text-sm text-slate-500">Global platform configuration and user management</p>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Settings</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Global platform configuration and user management</p>
             </div>
 
             <Tabs defaultValue="users" className="space-y-6">
-                <TabsList className="bg-slate-100 p-1">
+                <TabsList className="bg-slate-100 dark:bg-slate-800 p-1 border dark:border-slate-700">
                     <TabsTrigger value="users" className="gap-2">
                         <Users className="w-4 h-4" />
                         Users

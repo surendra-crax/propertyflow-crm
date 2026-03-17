@@ -7,9 +7,12 @@ import { Zap, Plus, Settings2, CheckCircle2, XCircle, ArrowRight, Play, Trash2 }
 import { Button } from "../../../../components/ui/button"
 import { toastError, toastSuccess } from "../../../../lib/toast"
 
+import CreateRuleModal from "./create-rule-modal"
+
 export default function AutomationsPage() {
   const [rules, setRules] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAdd, setShowAdd] = useState(false)
 
   useEffect(() => { loadRules() }, [])
 
@@ -22,6 +25,16 @@ export default function AutomationsPage() {
       toastError("Failed to load automations")
     }
     setLoading(false)
+  }
+
+  async function useTemplate(template: any) {
+    try {
+        await api.post("/automations", template)
+        toastSuccess("Rule created from template")
+        loadRules()
+    } catch {
+        toastError("Failed to create rule from template")
+    }
   }
 
   async function toggleRule(id: string, currentStatus: boolean) {
@@ -41,7 +54,7 @@ export default function AutomationsPage() {
         subtitle="Automate lead assignments, follow-ups, and pipeline movements based on triggers"
         badge={<Zap className="w-5 h-5 text-amber-500" />}
         action={
-          <Button className="gap-2 bg-slate-800 hover:bg-slate-700 text-white">
+          <Button onClick={() => setShowAdd(true)} className="gap-2 bg-slate-800 hover:bg-slate-700 text-white">
             <Plus className="w-4 h-4" />
             Create Rule
           </Button>
@@ -77,7 +90,11 @@ export default function AutomationsPage() {
                 </div>
                 <h3 className="font-bold text-slate-800 dark:text-white mb-2 text-lg">No Automations Yet</h3>
                 <p className="text-sm text-slate-500 max-w-sm mb-6">Build automated workflows to put your CRM on autopilot. Save hours of manual work every week.</p>
-                <Button variant="outline" className="gap-2">
+                <Button 
+                    variant="outline" 
+                    className="gap-2" 
+                    onClick={() => useTemplate({ name: "Auto-assign Leads (Template)", condition: "LEAD_CREATED", action: "ASSIGN_AGENT", isActive: true })}
+                >
                     <Play className="w-4 h-4 text-indigo-500" /> Use a Template
                 </Button>
             </div>
@@ -132,6 +149,13 @@ export default function AutomationsPage() {
             </div>
         )}
       </div>
+
+      {showAdd && (
+        <CreateRuleModal 
+          onClose={() => setShowAdd(false)} 
+          onCreated={loadRules} 
+        />
+      )}
     </div>
   )
 }

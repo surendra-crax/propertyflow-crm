@@ -115,7 +115,7 @@ export class AnalyticsService {
     });
 
     const leaderboard = await Promise.all(agents.map(async (agent) => {
-      const [leadsCount, deals] = await Promise.all([
+      const [leadsCount, deals, visitsCount] = await Promise.all([
         this.prisma.lead.count({ where: { assignedAgentId: agent.id } }),
         this.prisma.deal.findMany({
           where: { 
@@ -123,7 +123,8 @@ export class AnalyticsService {
             ...where
           },
           select: { saleValue: true }
-        })
+        }),
+        this.prisma.siteVisit.count({ where: { agentId: agent.id } })
       ]);
 
       return {
@@ -131,6 +132,7 @@ export class AnalyticsService {
         name: agent.name,
         leads: leadsCount,
         deals: deals.length,
+        visits: visitsCount,
         revenue: deals.reduce((sum, d) => sum + d.saleValue, 0)
       };
     }));

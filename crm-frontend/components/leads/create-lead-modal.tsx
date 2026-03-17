@@ -33,13 +33,13 @@ export default function LeadsPage() {
         params: { page, limit: 24, status: statusFilter, search }
       })
 
-      // ✅ SAFE FIX
+      // ✅ FIX 1: prevent undefined leads
       setLeads(res?.data?.data || [])
       setMeta(res?.data?.meta || null)
 
     } catch (err) {
       console.error(err)
-      setLeads([]) // fallback
+      setLeads([]) // fallback safety
     }
     setLoading(false)
   }
@@ -81,45 +81,81 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-5">
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-800 dark:text-white">Leads</h1>
           <p className="text-sm text-slate-400 dark:text-slate-500">{meta?.total || 0} total leads</p>
         </div>
-
         <div className="flex gap-3">
-          <button onClick={handleExport} className="flex items-center gap-2 bg-white dark:bg-slate-900 border px-4 py-2.5 rounded-lg text-sm">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+          >
             <FileText className="w-4 h-4" /> Export
           </button>
-          <button onClick={() => setShowCreate(true)} className="bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm">
+          <button
+            onClick={() => setShowCreate(true)}
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:from-indigo-500 hover:to-purple-500 transition-all shadow-sm"
+          >
             + Create Lead
           </button>
         </div>
       </div>
 
-      {/* Leads */}
-      {(leads?.length || 0) === 0 ? (
-        <div className="text-center py-10">
-          <Target className="mx-auto mb-2" />
-          No leads found
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search leads..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm text-slate-800 dark:text-slate-200"
+          />
+        </div>
+
+        <select
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value)
+            setPage(1)
+          }}
+          className="px-4 py-2.5 bg-white dark:bg-slate-900 border rounded-lg text-sm"
+        >
+          <option value="ALL">All Statuses</option>
+          <option value="NEW">New</option>
+          <option value="CONTACTED">Contacted</option>
+          <option value="FOLLOW_UP">Follow Up</option>
+          <option value="SITE_VISIT_DONE">Site Visit Done</option>
+          <option value="NEGOTIATION">Negotiation</option>
+          <option value="CLOSED_WON">Closed Won</option>
+          <option value="CLOSED_LOST">Closed Lost</option>
+        </select>
+      </div>
+
+      {/* Lead Cards */}
+      {(leads?.length || 0) === 0 ? ( // ✅ FIX 2
+        <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border">
+          <Target className="w-12 h-12 mx-auto mb-3" />
+          <p>No leads found</p>
         </div>
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {(leads || []).map((lead) => (
+          {(leads || []).map((lead) => ( // ✅ FIX 3
             <div key={lead?.id}>
 
-              <p>{lead?.fullName || "-"}</p>
-              <p>{lead?.phone || "-"}</p>
-
               <span>
-                {(lead?.status || "").replace(/_/g, " ")}
+                {(lead?.status || "").replace(/_/g, " ")} {/* ✅ FIX 4 */}
               </span>
 
-              <p>
-                ₹{((lead?.budgetMin || 0) / 100000).toFixed(0)}L - ₹{((lead?.budgetMax || 0) / 100000).toFixed(0)}L
-              </p>
+              <span>
+                ₹{((lead?.budgetMin || 0) / 100000).toFixed(0)}L - ₹{((lead?.budgetMax || 0) / 100000).toFixed(0)}L {/* ✅ FIX 5 */}
+              </span>
 
             </div>
           ))}
@@ -127,8 +163,8 @@ export default function LeadsPage() {
       )}
 
       {/* Pagination */}
-      {meta?.totalPages > 1 && (
-        <div className="flex justify-between">
+      {meta?.totalPages > 1 && ( // ✅ FIX 6
+        <div>
           <button onClick={() => setPage(p => Math.max(1, p - 1))}>
             Previous
           </button>
@@ -144,7 +180,6 @@ export default function LeadsPage() {
           onCreated={loadLeads}
         />
       )}
-
     </div>
   )
 }

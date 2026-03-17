@@ -105,8 +105,8 @@ export default function LeadDetailPage() {
               {lead.score} PTS
             </span>
           </div>
-          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status]}`}>
-            {lead.status.replace(/_/g, " ")}
+          <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${statusColors[lead.status || "NEW"] || statusColors.NEW}`}>
+            {(lead.status || "NEW").replace(/_/g, " ")}
           </span>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function LeadDetailPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Budget</span>
-                <span className="text-slate-600">₹{(lead.budgetMin / 100000).toFixed(1)}L - ₹{(lead.budgetMax / 100000).toFixed(1)}L</span>
+                <span className="text-slate-600">₹{((lead.budgetMin || 0) / 100000).toFixed(1)}L - ₹{((lead.budgetMax || 0) / 100000).toFixed(1)}L</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Source</span>

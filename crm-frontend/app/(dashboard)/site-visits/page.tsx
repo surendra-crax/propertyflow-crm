@@ -70,8 +70,8 @@ export default function SiteVisitsPage() {
                   <p className="text-sm font-semibold text-slate-800 dark:text-white">{visit.lead?.fullName}</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500">{visit.lead?.phone}</p>
                 </div>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColors[visit.status]}`}>
-                  {visit.status}
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColors[visit.status] || statusColors.SCHEDULED}`}>
+                  {visit.status || "SCHEDULED"}
                 </span>
               </div>
               <div className="space-y-2 text-xs">

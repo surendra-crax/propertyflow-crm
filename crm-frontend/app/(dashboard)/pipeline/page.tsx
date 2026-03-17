@@ -96,7 +96,7 @@ export default function PipelinePage() {
         <div className="flex gap-3 overflow-x-auto pb-4 flex-1 min-w-0 snap-x scroll-smooth">
           {statuses.map((stage) => {
             const leads = pipeline[stage.key] || []
-            const stageValue = leads.reduce((s: number, l: any) => s + (l.budgetMin + l.budgetMax) / 2, 0)
+            const stageValue = leads.reduce((s: number, l: any) => s + ((l.budgetMin || 0) + (l.budgetMax || 0)) / 2, 0)
 
             return (
               <Droppable droppableId={stage.key} key={stage.key}>
@@ -155,7 +155,7 @@ export default function PipelinePage() {
                                     {lead.project?.name || "—"}
                                   </span>
                                   <span className="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
-                                    ₹{((lead.budgetMin + lead.budgetMax) / 200000).toFixed(0)}L
+                                    ₹{(((lead.budgetMin || 0) + (lead.budgetMax || 0)) / 200000).toFixed(0)}L
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50 dark:border-slate-800/60">

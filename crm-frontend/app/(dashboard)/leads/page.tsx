@@ -32,10 +32,11 @@ export default function LeadsPage() {
       const res = await api.get("/leads", {
         params: { page, limit: 24, status: statusFilter, search }
       })
-      setLeads(res.data.data)
-      setMeta(res.data.meta)
+      setLeads(res.data.data || [])
+      setMeta(res.data.meta || null)
     } catch (err) {
       console.error(err)
+      setLeads([])
     }
     setLoading(false)
   }
@@ -152,8 +153,8 @@ export default function LeadsPage() {
                       <p className="text-xs text-slate-500 dark:text-slate-400">{lead.phone}</p>
                     </div>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColors[lead.status] || "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"}`}>
-                    {lead.status.replace(/_/g, " ")}
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${statusColors[lead.status || "NEW"] || statusColors.NEW}`}>
+                    {(lead.status || "NEW").replace(/_/g, " ")}
                   </span>
                 </div>
 
@@ -168,7 +169,7 @@ export default function LeadsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 dark:text-slate-500">Budget</span>
-                    <span className="text-slate-600 dark:text-slate-300">₹{(lead.budgetMin / 100000).toFixed(0)}L - ₹{(lead.budgetMax / 100000).toFixed(0)}L</span>
+                    <span className="text-slate-600 dark:text-slate-300">₹{((lead.budgetMin || 0) / 100000).toFixed(0)}L - ₹{((lead.budgetMax || 0) / 100000).toFixed(0)}L</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 dark:text-slate-500">Source</span>

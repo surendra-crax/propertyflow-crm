@@ -1,0 +1,3 @@
+- [Project Context](project_context.md) — PropertyFlow CRM: real estate sales platform, deployed on Vercel (frontend) + Render (NestJS API) + PostgreSQL
+- [Design System](design_system.md) — Enterprise design system: professional navy/blue palette, enterprise-card utility, shimmer skeleton, badge utilities
+- [New Features](new_features.md) — Four new enterprise features added: Floor Plans, Property Map, EMI Calculator, AI Lead Intelligence

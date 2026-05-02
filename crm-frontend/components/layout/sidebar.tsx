@@ -8,7 +8,7 @@ import {
   FolderKanban, BarChart3, Settings, CalendarCheck, Building2,
   UserCog, X, Upload, FileSearch, KeyRound, Megaphone, Timer,
   ShieldAlert, Gauge, Zap, Map, Calculator, Brain, ChevronDown,
-  ChevronRight, TrendingUp, Home, Layers, Cpu,
+  ChevronRight, TrendingUp, Home, Layers, Cpu, Plug,
 } from "lucide-react"
 import { useState } from "react"
 
@@ -79,10 +79,10 @@ const groups: NavGroup[] = [
     label: "Admin",
     defaultOpen: false,
     items: [
+      { name: "Integrations", path: "/integrations",        icon: Plug,       roles: ["ADMIN"] },
       { name: "Bulk Import",  path: "/leads/import",       icon: Upload,     roles: ["ADMIN","MANAGER"] },
       { name: "Automations",  path: "/settings/automations",icon: Zap,       roles: ["ADMIN"] },
       { name: "Audit Log",    path: "/settings/audit-log", icon: FileSearch, roles: ["ADMIN"] },
-      { name: "API Keys",     path: "/settings/api-keys",  icon: KeyRound,   roles: ["ADMIN"] },
       { name: "Settings",     path: "/settings",           icon: Settings,   roles: ["ADMIN"] },
     ],
   },

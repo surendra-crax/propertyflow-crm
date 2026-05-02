@@ -1,178 +1,213 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Building2, ArrowRight } from "lucide-react";
-import { api } from "../../lib/api";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Building2, ArrowRight, Zap, BarChart3, Users, Handshake } from "lucide-react"
+import { api } from "../../lib/api"
+
+const ROLES = [
+  {
+    key:       "admin",
+    email:     "admin@propertyflow.com",
+    label:     "System Admin",
+    badge:     "Full Control",
+    desc:      "Manage projects, agents, analytics, and all company data.",
+    color:     "blue",
+    icon:      BarChart3,
+    active:    "border-blue-500 bg-blue-50 dark:bg-blue-950/40",
+    inactive:  "border-border hover:border-blue-400",
+    badgeCls:  "text-blue-600 bg-blue-100 dark:bg-blue-900/50 dark:text-blue-400",
+    arrowCls:  "group-hover:text-blue-500",
+    spinCls:   "border-blue-600 border-t-transparent",
+  },
+  {
+    key:       "manager",
+    email:     "priya@propertyflow.com",
+    label:     "Sales Manager",
+    badge:     "Management",
+    desc:      "Track team pipeline, performance analytics, and deals.",
+    color:     "violet",
+    icon:      Users,
+    active:    "border-violet-500 bg-violet-50 dark:bg-violet-950/40",
+    inactive:  "border-border hover:border-violet-400",
+    badgeCls:  "text-violet-600 bg-violet-100 dark:bg-violet-900/50 dark:text-violet-400",
+    arrowCls:  "group-hover:text-violet-500",
+    spinCls:   "border-violet-600 border-t-transparent",
+  },
+  {
+    key:       "agent",
+    email:     "amit@propertyflow.com",
+    label:     "Property Advisor",
+    badge:     "Sales Agent",
+    desc:      "Manage daily leads, site visits, and follow-ups.",
+    color:     "emerald",
+    icon:      Zap,
+    active:    "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
+    inactive:  "border-border hover:border-emerald-400",
+    badgeCls:  "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 dark:text-emerald-400",
+    arrowCls:  "group-hover:text-emerald-500",
+    spinCls:   "border-emerald-600 border-t-transparent",
+  },
+  {
+    key:       "broker",
+    email:     "sunil@brokers.com",
+    label:     "External Broker",
+    badge:     "Partner Access",
+    desc:      "Submit leads and track your commissions.",
+    color:     "amber",
+    icon:      Handshake,
+    active:    "border-amber-500 bg-amber-50 dark:bg-amber-950/40",
+    inactive:  "border-border hover:border-amber-400",
+    badgeCls:  "text-amber-600 bg-amber-100 dark:bg-amber-900/50 dark:text-amber-400",
+    arrowCls:  "group-hover:text-amber-500",
+    spinCls:   "border-amber-600 border-t-transparent",
+  },
+]
+
+type WakeStage = "idle" | "waking" | "logging" | "done"
 
 export default function DemoLoginPage() {
-    const router = useRouter();
+  const router = useRouter()
+  const [activeRole, setActiveRole] = useState<string | null>(null)
+  const [stage, setStage]           = useState<WakeStage>("idle")
+  const [error, setError]           = useState("")
 
-    // Auto-fill logic when user clicks the credentials
-    const [loadingRole, setLoadingRole] = useState<string | null>(null);
+  async function handleLogin(roleKey: string, email: string) {
+    if (activeRole) return
+    setActiveRole(roleKey)
+    setError("")
+    setStage("waking")
 
-    const handleLogin = async (e: React.FormEvent, role: string) => {
-        e.preventDefault();
-        setLoadingRole(role);
-        
-        let email = 'admin@propertyflow.com';
-        let password = 'password123';
+    // First ping health — this wakes the Render cold-start server
+    try {
+      await Promise.race([
+        api.get("/health"),
+        new Promise<void>(res => setTimeout(res, 8000)), // max 8s warm-up
+      ])
+    } catch { /* still try login even if health fails */ }
 
-        if (role === 'manager') email = 'priya@propertyflow.com';
-        if (role === 'agent') email = 'amit@propertyflow.com';
-        if (role === 'broker') email = 'sunil@brokers.com';
+    setStage("logging")
 
-        try {
-            const res = await api.post("/auth/login", { email, password });
-            
-            const token = res.data.access_token;
-            const user = res.data.user;
+    try {
+      const res  = await api.post("/auth/login", { email, password: "password123" })
+      const token = res.data.access_token
+      const user  = res.data.user
+      localStorage.clear()
+      localStorage.setItem("token",  token)
+      localStorage.setItem("user",   JSON.stringify(user))
+      localStorage.setItem("userId", user.id)
+      localStorage.setItem("role",   user.role)
+      setStage("done")
+      router.push("/dashboard")
+    } catch {
+      setError("Login failed — the server may still be waking up. Please try again in a few seconds.")
+      setActiveRole(null)
+      setStage("idle")
+    }
+  }
 
-            localStorage.clear();
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("userId", user.id);
-            localStorage.setItem("role", user.role);
-            
-            router.push("/dashboard");
-        } catch (err) {
-            console.error(err);
-            alert('Demo login failed. Please ensure the backend server is running and seeded.');
-            setLoadingRole(null);
-        }
-    };
+  const stageLabel: Record<WakeStage, string> = {
+    idle:    "",
+    waking:  "Waking server…",
+    logging: "Signing you in…",
+    done:    "Redirecting…",
+  }
 
-    return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden transition-colors">
-            {/* Background decorations */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
 
-            <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 z-10">
-                {/* Left side info */}
-                <div className="flex flex-col justify-center">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                        <Building2 className="w-6 h-6 text-white" />
-                    </div>
-                    <h1 className="text-4xl font-bold text-slate-800 dark:text-white mb-4 leading-tight">
-                        PropertyFlow CRM <br /> Live Demo Environment
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-300 mb-8 text-lg">
-                        Explore the platform exactly as your sales team would. We've pre-loaded dummy data including leads, projects, and deals so you can see it in action.
-                    </p>
-                    <div className="p-6 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/50 rounded-2xl">
-                        <h3 className="font-semibold text-indigo-900 dark:text-indigo-200 mb-2">Important Notice</h3>
-                        <p className="text-sm text-indigo-700 dark:text-indigo-300 leading-relaxed">
-                            This is a public demo sandbox. Any data you enter or modify may be visible to others and is reset periodically. Do not enter real prospect information.
-                        </p>
-                    </div>
-                </div>
+      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-5 gap-8">
 
-                {/* Right side form cards */}
-                <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 shadow-xl flex flex-col gap-6">
-                    <div className="text-center mb-2">
-                        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Choose your role</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Explore PropertyFlow with different access levels.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4">
-                        {/* Admin Demo Card */}
-                        <button
-                            disabled={!!loadingRole}
-                            onClick={(e) => handleLogin(e, 'admin')}
-                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
-                                loadingRole === 'admin' 
-                                ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/40' 
-                                : 'border-slate-100 dark:border-slate-700 hover:border-indigo-500 bg-slate-50 dark:bg-slate-900/50'
-                            }`}
-                        >
-                            <div className="flex-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50 px-2 py-0.5 rounded-md">Full Control</span>
-                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">System Admin</h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage projects, agents, and view all company reports.</p>
-                            </div>
-                            {loadingRole === 'admin' ? (
-                                <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
-                            )}
-                        </button>
-
-                        {/* Manager Demo Card */}
-                        <button
-                            disabled={!!loadingRole}
-                            onClick={(e) => handleLogin(e, 'manager')}
-                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
-                                loadingRole === 'manager' 
-                                ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/40' 
-                                : 'border-slate-100 dark:border-slate-700 hover:border-purple-500 bg-slate-50 dark:bg-slate-900/50'
-                            }`}
-                        >
-                            <div className="flex-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/50 px-2 py-0.5 rounded-md">Management</span>
-                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">Sales Manager</h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track team pipeline, performance analytics, and deals.</p>
-                            </div>
-                            {loadingRole === 'manager' ? (
-                                <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-                            )}
-                        </button>
-
-                        {/* Agent Demo Card */}
-                        <button
-                            disabled={!!loadingRole}
-                            onClick={(e) => handleLogin(e, 'agent')}
-                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
-                                loadingRole === 'agent' 
-                                ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/40' 
-                                : 'border-slate-100 dark:border-slate-700 hover:border-emerald-500 bg-slate-50 dark:bg-slate-900/50'
-                            }`}
-                        >
-                            <div className="flex-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md">Sales Agent</span>
-                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">Property Advisor</h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage daily leads, site visits, and follow-ups.</p>
-                            </div>
-                            {loadingRole === 'agent' ? (
-                                <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
-                            )}
-                        </button>
-
-                        {/* Broker Demo Card */}
-                        <button
-                            disabled={!!loadingRole}
-                            onClick={(e) => handleLogin(e, 'broker')}
-                            className={`group flex items-center justify-between p-5 rounded-2xl border-2 transition-all hover:shadow-lg text-left ${
-                                loadingRole === 'broker' 
-                                ? 'border-amber-600 bg-amber-50 dark:bg-amber-900/40' 
-                                : 'border-slate-100 dark:border-slate-700 hover:border-amber-500 bg-slate-50 dark:bg-slate-900/50'
-                            }`}
-                        >
-                            <div className="flex-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded-md">Partner Access</span>
-                                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-1">External Broker</h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Submit leads and track your project-wide commissions.</p>
-                            </div>
-                            {loadingRole === 'broker' ? (
-                                <div className="w-5 h-5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
-                            )}
-                        </button>
-                    </div>
-
-                    <button
-                        onClick={() => router.push('/landing')}
-                        className="text-center text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors mt-2"
-                    >
-                        Return to Website
-                    </button>
-                </div>
+        {/* Left — branding */}
+        <div className="md:col-span-2 flex flex-col justify-center">
+          <div className="flex items-center gap-2.5 mb-8">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+              <Building2 className="w-5 h-5 text-primary-foreground" />
             </div>
+            <div>
+              <p className="font-bold text-foreground">PropertyFlow</p>
+              <p className="text-[9px] text-muted-foreground uppercase tracking-[0.2em]">Enterprise CRM</p>
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-bold text-foreground leading-tight mb-3">
+            Live Demo<br />Environment
+          </h1>
+          <p className="text-muted-foreground leading-relaxed mb-6 text-sm">
+            Explore the full platform with real data pre-loaded — leads, projects, deals, analytics and all new enterprise features.
+          </p>
+
+          {/* Warm-up notice */}
+          <div className="rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 p-4">
+            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">⚡ Server Warm-up</p>
+            <p className="text-xs text-amber-600 dark:text-amber-500 leading-relaxed">
+              The demo server may take <strong>10–20 seconds</strong> on first login as it wakes from sleep. We show you the progress — just click your role and wait.
+            </p>
+          </div>
         </div>
-    );
+
+        {/* Right — role cards */}
+        <div className="md:col-span-3 bg-card rounded-2xl border border-border shadow-lg p-6 flex flex-col gap-4">
+          <div className="mb-1">
+            <h2 className="text-lg font-bold text-foreground">Choose your role</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">Each role shows different features and permissions.</p>
+          </div>
+
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/25 rounded-xl px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          {ROLES.map(role => {
+            const Icon    = role.icon
+            const isThis  = activeRole === role.key
+            const busy    = !!activeRole
+
+            return (
+              <button
+                key={role.key}
+                disabled={busy}
+                onClick={() => handleLogin(role.key, role.email)}
+                className={`group flex items-center gap-4 p-4 rounded-xl border-2 transition-all text-left disabled:cursor-wait ${
+                  isThis ? role.active : role.inactive
+                } ${busy && !isThis ? "opacity-40" : ""}`}
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isThis ? "bg-white/80 dark:bg-black/20" : "bg-muted"}`}>
+                  <Icon className={`w-5 h-5 ${isThis ? `text-${role.color}-600 dark:text-${role.color}-400` : "text-muted-foreground"}`} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${role.badgeCls}`}>
+                      {role.badge}
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-foreground">{role.label}</p>
+                  {isThis ? (
+                    <p className="text-xs text-primary font-medium mt-0.5 animate-pulse">{stageLabel[stage]}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-0.5">{role.desc}</p>
+                  )}
+                </div>
+
+                {isThis ? (
+                  <div className={`w-5 h-5 border-2 rounded-full animate-spin shrink-0 ${role.spinCls}`} />
+                ) : (
+                  <ArrowRight className={`w-5 h-5 text-muted-foreground transition-all shrink-0 ${role.arrowCls} group-hover:translate-x-0.5`} />
+                )}
+              </button>
+            )
+          })}
+
+          <button
+            onClick={() => router.push("/landing")}
+            className="text-center text-sm text-muted-foreground hover:text-foreground transition-colors mt-1"
+          >
+            ← Return to website
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
